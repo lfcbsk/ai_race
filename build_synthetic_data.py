@@ -1279,8 +1279,8 @@ LLM_MODELS = {
         "base_url": "https://api.groq.com/openai/v1",
         "api_key_env": "GROQ_API_KEY",
         "temperature": 0.7,
-        "max_tokens": 1000,
-        "enabled": False,
+        "max_tokens": 1500,
+        "enabled": True,
     },
         "groq_llama_8b": {   # ← model mới, thay thế slot của groq_qwen
         "provider": "openai_compatible",
@@ -1289,7 +1289,7 @@ LLM_MODELS = {
         "api_key_env": "GROQ_API_KEY",
         "temperature": 0.7,
         "max_tokens": 1000,
-        "enabled": True,
+        "enabled": False,
     },
     "openrouter_free": {
         "provider": "openai_compatible",

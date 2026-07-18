@@ -1,0 +1,5718 @@
+{
+  "verified": [
+    {
+      "original_text": "acetaminophen",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "acetaminophen",
+        "normalized_text": "acetaminophen",
+        "drug_name": "acetaminophen",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "161",
+        "name": "acetaminophen",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "161",
+          "name": "acetaminophen",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "adalimumab",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "adalimumab",
+        "normalized_text": "adalimumab",
+        "drug_name": "adalimumab",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "327361",
+        "name": "adalimumab",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "327361",
+          "name": "adalimumab",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "adenosine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "adenosine",
+        "normalized_text": "adenosine",
+        "drug_name": "adenosine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "296",
+        "name": "adenosine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "296",
+          "name": "adenosine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "alosetron",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "alosetron",
+        "normalized_text": "alosetron",
+        "drug_name": "alosetron",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "85248",
+        "name": "alosetron",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "85248",
+          "name": "alosetron",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "amiodarone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "amiodarone",
+        "normalized_text": "amiodarone",
+        "drug_name": "amiodarone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "703",
+        "name": "amiodarone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "703",
+          "name": "amiodarone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "amitriptyline",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "amitriptyline",
+        "normalized_text": "amitriptyline",
+        "drug_name": "amitriptyline",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "704",
+        "name": "amitriptyline",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "704",
+          "name": "amitriptyline",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "amoxicillin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "amoxicillin",
+        "normalized_text": "amoxicillin",
+        "drug_name": "amoxicillin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "723",
+        "name": "amoxicillin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "723",
+          "name": "amoxicillin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "apixaban",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "apixaban",
+        "normalized_text": "apixaban",
+        "drug_name": "apixaban",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1364430",
+        "name": "apixaban",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1364430",
+          "name": "apixaban",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "aspirin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "aspirin",
+        "normalized_text": "aspirin",
+        "drug_name": "aspirin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1191",
+        "name": "aspirin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1191",
+          "name": "aspirin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "atenolol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "atenolol",
+        "normalized_text": "atenolol",
+        "drug_name": "atenolol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1202",
+        "name": "atenolol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1202",
+          "name": "atenolol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "atropine iv",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "atropine iv",
+        "normalized_text": "atropine iv",
+        "drug_name": "atropine",
+        "strength": null,
+        "dose_form": null,
+        "route": "intravenous",
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1223",
+        "name": "atropine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1223",
+          "name": "atropine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "azathioprine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "azathioprine",
+        "normalized_text": "azathioprine",
+        "drug_name": "azathioprine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1256",
+        "name": "azathioprine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1256",
+          "name": "azathioprine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "azelastine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "azelastine",
+        "normalized_text": "azelastine",
+        "drug_name": "azelastine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "18603",
+        "name": "azelastine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "18603",
+          "name": "azelastine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "azithromycin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "azithromycin",
+        "normalized_text": "azithromycin",
+        "drug_name": "azithromycin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "18631",
+        "name": "azithromycin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "18631",
+          "name": "azithromycin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "beclomethasone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "beclomethasone",
+        "normalized_text": "beclomethasone",
+        "drug_name": "beclomethasone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1347",
+        "name": "beclomethasone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1347",
+          "name": "beclomethasone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "belatacept",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "belatacept",
+        "normalized_text": "belatacept",
+        "drug_name": "belatacept",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1112973",
+        "name": "belatacept",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1112973",
+          "name": "belatacept",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "bevacizumab",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "bevacizumab",
+        "normalized_text": "bevacizumab",
+        "drug_name": "bevacizumab",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "253337",
+        "name": "bevacizumab",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "253337",
+          "name": "bevacizumab",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "bismuth subsalicylate",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "bismuth subsalicylate",
+        "normalized_text": "bismuth subsalicylate",
+        "drug_name": "bismuth subsalicylate",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "19478",
+        "name": "bismuth subsalicylate",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "19478",
+          "name": "bismuth subsalicylate",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "bisoprolol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "bisoprolol",
+        "normalized_text": "bisoprolol",
+        "drug_name": "bisoprolol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "19484",
+        "name": "bisoprolol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "19484",
+          "name": "bisoprolol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "bivalirudin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "bivalirudin",
+        "normalized_text": "bivalirudin",
+        "drug_name": "bivalirudin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "60819",
+        "name": "bivalirudin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "60819",
+          "name": "bivalirudin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "bosentan",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "bosentan",
+        "normalized_text": "bosentan",
+        "drug_name": "bosentan",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "75207",
+        "name": "bosentan",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "75207",
+          "name": "bosentan",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "budesonide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "budesonide",
+        "normalized_text": "budesonide",
+        "drug_name": "budesonide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "19831",
+        "name": "budesonide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "19831",
+          "name": "budesonide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "caffeine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "caffeine",
+        "normalized_text": "caffeine",
+        "drug_name": "caffeine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1886",
+        "name": "caffeine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1886",
+          "name": "caffeine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "capecitabine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "capecitabine",
+        "normalized_text": "capecitabine",
+        "drug_name": "capecitabine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "194000",
+        "name": "capecitabine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "194000",
+          "name": "capecitabine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "captopril",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "captopril",
+        "normalized_text": "captopril",
+        "drug_name": "captopril",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1998",
+        "name": "captopril",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1998",
+          "name": "captopril",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "carbamide peroxide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "carbamide peroxide",
+        "normalized_text": "carbamide peroxide",
+        "drug_name": "carbamide peroxide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "47686",
+        "name": "carbamide peroxide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "47686",
+          "name": "carbamide peroxide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ceftriaxone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ceftriaxone",
+        "normalized_text": "ceftriaxone",
+        "drug_name": "ceftriaxone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "2193",
+        "name": "ceftriaxone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "2193",
+          "name": "ceftriaxone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "celecoxib",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "celecoxib",
+        "normalized_text": "celecoxib",
+        "drug_name": "celecoxib",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "140587",
+        "name": "celecoxib",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "140587",
+          "name": "celecoxib",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "cephalexin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cephalexin",
+        "normalized_text": "cephalexin",
+        "drug_name": "cephalexin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "2231",
+        "name": "cephalexin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "2231",
+          "name": "cephalexin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "certolizumab pegol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "certolizumab pegol",
+        "normalized_text": "certolizumab pegol",
+        "drug_name": "certolizumab pegol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "709271",
+        "name": "certolizumab pegol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "709271",
+          "name": "certolizumab pegol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "cetuximab",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cetuximab",
+        "normalized_text": "cetuximab",
+        "drug_name": "cetuximab",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "318341",
+        "name": "cetuximab",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "318341",
+          "name": "cetuximab",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "chloramphenicol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "chloramphenicol",
+        "normalized_text": "chloramphenicol",
+        "drug_name": "chloramphenicol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "2348",
+        "name": "chloramphenicol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "2348",
+          "name": "chloramphenicol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "cimetidine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cimetidine",
+        "normalized_text": "cimetidine",
+        "drug_name": "cimetidine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "2541",
+        "name": "cimetidine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "2541",
+          "name": "cimetidine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ciprofloxacin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ciprofloxacin",
+        "normalized_text": "ciprofloxacin",
+        "drug_name": "ciprofloxacin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "2551",
+        "name": "ciprofloxacin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "2551",
+          "name": "ciprofloxacin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "clarithromycin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "clarithromycin",
+        "normalized_text": "clarithromycin",
+        "drug_name": "clarithromycin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "21212",
+        "name": "clarithromycin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "21212",
+          "name": "clarithromycin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "clemastine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "clemastine",
+        "normalized_text": "clemastine",
+        "drug_name": "clemastine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "2578",
+        "name": "clemastine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "2578",
+          "name": "clemastine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "clopidogrel",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "clopidogrel",
+        "normalized_text": "clopidogrel",
+        "drug_name": "clopidogrel",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "32968",
+        "name": "clopidogrel",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "32968",
+          "name": "clopidogrel",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "colestipol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "colestipol",
+        "normalized_text": "colestipol",
+        "drug_name": "colestipol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "2685",
+        "name": "colestipol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "2685",
+          "name": "colestipol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "cromolyn sodium",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cromolyn sodium",
+        "normalized_text": "cromolyn sodium",
+        "drug_name": "cromolyn sodium",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3538",
+        "name": "cromolyn sodium",
+        "tty": "PIN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3538",
+          "name": "cromolyn sodium",
+          "tty": "PIN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "cyclophosphamide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cyclophosphamide",
+        "normalized_text": "cyclophosphamide",
+        "drug_name": "cyclophosphamide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3002",
+        "name": "cyclophosphamide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3002",
+          "name": "cyclophosphamide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "cyclosporine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cyclosporine",
+        "normalized_text": "cyclosporine",
+        "drug_name": "cyclosporine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3008",
+        "name": "cyclosporine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3008",
+          "name": "cyclosporine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "dabigatran",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "dabigatran",
+        "normalized_text": "dabigatran",
+        "drug_name": "dabigatran",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1546356",
+        "name": "dabigatran",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1546356",
+          "name": "dabigatran",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "dapsone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "dapsone",
+        "normalized_text": "dapsone",
+        "drug_name": "dapsone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3108",
+        "name": "dapsone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3108",
+          "name": "dapsone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "diclofenac",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "diclofenac",
+        "normalized_text": "diclofenac",
+        "drug_name": "diclofenac",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3355",
+        "name": "diclofenac",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3355",
+          "name": "diclofenac",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "digoxin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "digoxin",
+        "normalized_text": "digoxin",
+        "drug_name": "digoxin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3407",
+        "name": "digoxin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3407",
+          "name": "digoxin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "diltiazem",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "diltiazem",
+        "normalized_text": "diltiazem",
+        "drug_name": "diltiazem",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3443",
+        "name": "diltiazem",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3443",
+          "name": "diltiazem",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "diphenhydramine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "diphenhydramine",
+        "normalized_text": "diphenhydramine",
+        "drug_name": "diphenhydramine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3498",
+        "name": "diphenhydramine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3498",
+          "name": "diphenhydramine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "disopyramide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "disopyramide",
+        "normalized_text": "disopyramide",
+        "drug_name": "disopyramide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3541",
+        "name": "disopyramide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3541",
+          "name": "disopyramide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "dofetilide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "dofetilide",
+        "normalized_text": "dofetilide",
+        "drug_name": "dofetilide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "49247",
+        "name": "dofetilide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "49247",
+          "name": "dofetilide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "donepezil",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "donepezil",
+        "normalized_text": "donepezil",
+        "drug_name": "donepezil",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "135447",
+        "name": "donepezil",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "135447",
+          "name": "donepezil",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "dopamine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "dopamine",
+        "normalized_text": "dopamine",
+        "drug_name": "dopamine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3628",
+        "name": "dopamine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3628",
+          "name": "dopamine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "doxycycline",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "doxycycline",
+        "normalized_text": "doxycycline",
+        "drug_name": "doxycycline",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "3640",
+        "name": "doxycycline",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "3640",
+          "name": "doxycycline",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "enoxaparin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "enoxaparin",
+        "normalized_text": "enoxaparin",
+        "drug_name": "enoxaparin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "67108",
+        "name": "enoxaparin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "67108",
+          "name": "enoxaparin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ergotamine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ergotamine",
+        "normalized_text": "ergotamine",
+        "drug_name": "ergotamine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "4025",
+        "name": "ergotamine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "4025",
+          "name": "ergotamine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "erlotinib",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "erlotinib",
+        "normalized_text": "erlotinib",
+        "drug_name": "erlotinib",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "337525",
+        "name": "erlotinib",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "337525",
+          "name": "erlotinib",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "erythromycin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "erythromycin",
+        "normalized_text": "erythromycin",
+        "drug_name": "erythromycin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "4053",
+        "name": "erythromycin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "4053",
+          "name": "erythromycin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "esomeprazole",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "esomeprazole",
+        "normalized_text": "esomeprazole",
+        "drug_name": "esomeprazole",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "283742",
+        "name": "esomeprazole",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "283742",
+          "name": "esomeprazole",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "famotidine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "famotidine",
+        "normalized_text": "famotidine",
+        "drug_name": "famotidine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "4278",
+        "name": "famotidine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "4278",
+          "name": "famotidine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "flecainide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "flecainide",
+        "normalized_text": "flecainide",
+        "drug_name": "flecainide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "4441",
+        "name": "flecainide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "4441",
+          "name": "flecainide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "flunisolide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "flunisolide",
+        "normalized_text": "flunisolide",
+        "drug_name": "flunisolide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "25120",
+        "name": "flunisolide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "25120",
+          "name": "flunisolide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "fluoxetine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "fluoxetine",
+        "normalized_text": "fluoxetine",
+        "drug_name": "fluoxetine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "4493",
+        "name": "fluoxetine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "4493",
+          "name": "fluoxetine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "fluticasone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "fluticasone",
+        "normalized_text": "fluticasone",
+        "drug_name": "fluticasone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "41126",
+        "name": "fluticasone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "41126",
+          "name": "fluticasone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "fluticasone propionate",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "fluticasone propionate",
+        "normalized_text": "fluticasone propionate",
+        "drug_name": "fluticasone propionate",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "50121",
+        "name": "fluticasone propionate",
+        "tty": "PIN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "50121",
+          "name": "fluticasone propionate",
+          "tty": "PIN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "folate",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "folate",
+        "normalized_text": "folate",
+        "drug_name": "folate",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "62356",
+        "name": "folate",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "62356",
+          "name": "folate",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "fondaparinux",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "fondaparinux",
+        "normalized_text": "fondaparinux",
+        "drug_name": "fondaparinux",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "321208",
+        "name": "fondaparinux",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "321208",
+          "name": "fondaparinux",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "gabapentin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "gabapentin",
+        "normalized_text": "gabapentin",
+        "drug_name": "gabapentin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "25480",
+        "name": "gabapentin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "25480",
+          "name": "gabapentin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "galantamine hydrobromide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "galantamine hydrobromide",
+        "normalized_text": "galantamine hydrobromide",
+        "drug_name": "galantamine hydrobromide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "860693",
+        "name": "galantamine hydrobromide",
+        "tty": "PIN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "860693",
+          "name": "galantamine hydrobromide",
+          "tty": "PIN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "gentamycin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "gentamycin",
+        "normalized_text": "gentamycin",
+        "drug_name": "gentamycin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1596450",
+        "name": "gentamicin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1596450",
+          "name": "gentamicin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "verified_spelling_alias",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "glycerin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "glycerin",
+        "normalized_text": "glycerin",
+        "drug_name": "glycerin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "4910",
+        "name": "glycerin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "4910",
+          "name": "glycerin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "heparin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "heparin",
+        "normalized_text": "heparin",
+        "drug_name": "heparin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "5224",
+        "name": "heparin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "5224",
+          "name": "heparin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "hydralazine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "hydralazine",
+        "normalized_text": "hydralazine",
+        "drug_name": "hydralazine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "5470",
+        "name": "hydralazine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "5470",
+          "name": "hydralazine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "hydrocortisone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "hydrocortisone",
+        "normalized_text": "hydrocortisone",
+        "drug_name": "hydrocortisone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "5492",
+        "name": "hydrocortisone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "5492",
+          "name": "hydrocortisone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "hydrogen peroxide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "hydrogen peroxide",
+        "normalized_text": "hydrogen peroxide",
+        "drug_name": "hydrogen peroxide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "5499",
+        "name": "hydrogen peroxide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "5499",
+          "name": "hydrogen peroxide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ibritumomab tiuxetan",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ibritumomab tiuxetan",
+        "normalized_text": "ibritumomab tiuxetan",
+        "drug_name": "ibritumomab tiuxetan",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "262323",
+        "name": "ibritumomab tiuxetan",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "262323",
+          "name": "ibritumomab tiuxetan",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ibuprofen",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ibuprofen",
+        "normalized_text": "ibuprofen",
+        "drug_name": "ibuprofen",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "5640",
+        "name": "ibuprofen",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "5640",
+          "name": "ibuprofen",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ibutilide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ibutilide",
+        "normalized_text": "ibutilide",
+        "drug_name": "ibutilide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "41289",
+        "name": "ibutilide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "41289",
+          "name": "ibutilide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "idebenone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "idebenone",
+        "normalized_text": "idebenone",
+        "drug_name": "idebenone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "51296",
+        "name": "idebenone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "51296",
+          "name": "idebenone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "iloprost",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "iloprost",
+        "normalized_text": "iloprost",
+        "drug_name": "iloprost",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "40138",
+        "name": "iloprost",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "40138",
+          "name": "iloprost",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "im atropine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "im atropine",
+        "normalized_text": "im atropine",
+        "drug_name": "atropine",
+        "strength": null,
+        "dose_form": null,
+        "route": "intramuscular",
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1223",
+        "name": "atropine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1223",
+          "name": "atropine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "imipramine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "imipramine",
+        "normalized_text": "imipramine",
+        "drug_name": "imipramine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "5691",
+        "name": "imipramine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "5691",
+          "name": "imipramine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "indomethacin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "indomethacin",
+        "normalized_text": "indomethacin",
+        "drug_name": "indomethacin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "5781",
+        "name": "indomethacin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "5781",
+          "name": "indomethacin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "infliximab",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "infliximab",
+        "normalized_text": "infliximab",
+        "drug_name": "infliximab",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "191831",
+        "name": "infliximab",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "191831",
+          "name": "infliximab",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ipratropium",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ipratropium",
+        "normalized_text": "ipratropium",
+        "drug_name": "ipratropium",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7213",
+        "name": "ipratropium",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7213",
+          "name": "ipratropium",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "isosorbide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "isosorbide",
+        "normalized_text": "isosorbide",
+        "drug_name": "isosorbide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6057",
+        "name": "isosorbide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6057",
+          "name": "isosorbide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "isotretinoin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "isotretinoin",
+        "normalized_text": "isotretinoin",
+        "drug_name": "isotretinoin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6064",
+        "name": "isotretinoin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6064",
+          "name": "isotretinoin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ketoprofen",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ketoprofen",
+        "normalized_text": "ketoprofen",
+        "drug_name": "ketoprofen",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6142",
+        "name": "ketoprofen",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6142",
+          "name": "ketoprofen",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "labetalol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "labetalol",
+        "normalized_text": "labetalol",
+        "drug_name": "labetalol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6185",
+        "name": "labetalol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6185",
+          "name": "labetalol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "lansoprazole",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "lansoprazole",
+        "normalized_text": "lansoprazole",
+        "drug_name": "lansoprazole",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "17128",
+        "name": "lansoprazole",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "17128",
+          "name": "lansoprazole",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "levofloxacin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "levofloxacin",
+        "normalized_text": "levofloxacin",
+        "drug_name": "levofloxacin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "82122",
+        "name": "levofloxacin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "82122",
+          "name": "levofloxacin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "lidocain",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "lidocain",
+        "normalized_text": "lidocain",
+        "drug_name": "lidocain",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6387",
+        "name": "lidocaine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6387",
+          "name": "lidocaine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "verified_spelling_alias",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "lidocaine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "lidocaine",
+        "normalized_text": "lidocaine",
+        "drug_name": "lidocaine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6387",
+        "name": "lidocaine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6387",
+          "name": "lidocaine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "lisinopril",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "lisinopril",
+        "normalized_text": "lisinopril",
+        "drug_name": "lisinopril",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "29046",
+        "name": "lisinopril",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "29046",
+          "name": "lisinopril",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "loperamide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "loperamide",
+        "normalized_text": "loperamide",
+        "drug_name": "loperamide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6468",
+        "name": "loperamide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6468",
+          "name": "loperamide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "losartan",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "losartan",
+        "normalized_text": "losartan",
+        "drug_name": "losartan",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "52175",
+        "name": "losartan",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "52175",
+          "name": "losartan",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "lubiprostone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "lubiprostone",
+        "normalized_text": "lubiprostone",
+        "drug_name": "lubiprostone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "623033",
+        "name": "lubiprostone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "623033",
+          "name": "lubiprostone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "magnesium tĩnh mạch",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "magnesium tĩnh mạch",
+        "normalized_text": "magnesium tĩnh mạch",
+        "drug_name": "magnesium",
+        "strength": null,
+        "dose_form": null,
+        "route": "intravenous",
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6574",
+        "name": "magnesium",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6574",
+          "name": "magnesium",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "meprobamate",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "meprobamate",
+        "normalized_text": "meprobamate",
+        "drug_name": "meprobamate",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6760",
+        "name": "meprobamate",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6760",
+          "name": "meprobamate",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "mesalamine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "mesalamine",
+        "normalized_text": "mesalamine",
+        "drug_name": "mesalamine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "52582",
+        "name": "mesalamine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "52582",
+          "name": "mesalamine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "methotrexate",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "methotrexate",
+        "normalized_text": "methotrexate",
+        "drug_name": "methotrexate",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6851",
+        "name": "methotrexate",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6851",
+          "name": "methotrexate",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "methylcellulose",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "methylcellulose",
+        "normalized_text": "methylcellulose",
+        "drug_name": "methylcellulose",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6873",
+        "name": "methylcellulose",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6873",
+          "name": "methylcellulose",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "methylprednisolone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "methylprednisolone",
+        "normalized_text": "methylprednisolone",
+        "drug_name": "methylprednisolone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6902",
+        "name": "methylprednisolone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6902",
+          "name": "methylprednisolone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "metoprolol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "metoprolol",
+        "normalized_text": "metoprolol",
+        "drug_name": "metoprolol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6918",
+        "name": "metoprolol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6918",
+          "name": "metoprolol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "metronidazole",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "metronidazole",
+        "normalized_text": "metronidazole",
+        "drug_name": "metronidazole",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "6922",
+        "name": "metronidazole",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "6922",
+          "name": "metronidazole",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "modafinil",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "modafinil",
+        "normalized_text": "modafinil",
+        "drug_name": "modafinil",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "30125",
+        "name": "modafinil",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "30125",
+          "name": "modafinil",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "mometasone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "mometasone",
+        "normalized_text": "mometasone",
+        "drug_name": "mometasone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "108118",
+        "name": "mometasone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "108118",
+          "name": "mometasone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "montelukast",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "montelukast",
+        "normalized_text": "montelukast",
+        "drug_name": "montelukast",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "88249",
+        "name": "montelukast",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "88249",
+          "name": "montelukast",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "mycophenolate mofetil",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "mycophenolate mofetil",
+        "normalized_text": "mycophenolate mofetil",
+        "drug_name": "mycophenolate mofetil",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "68149",
+        "name": "mycophenolate mofetil",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "68149",
+          "name": "mycophenolate mofetil",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "nadolol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nadolol",
+        "normalized_text": "nadolol",
+        "drug_name": "nadolol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7226",
+        "name": "nadolol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7226",
+          "name": "nadolol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "naproxen",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "naproxen",
+        "normalized_text": "naproxen",
+        "drug_name": "naproxen",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7258",
+        "name": "naproxen",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7258",
+          "name": "naproxen",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "natalizumab",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "natalizumab",
+        "normalized_text": "natalizumab",
+        "drug_name": "natalizumab",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "354770",
+        "name": "natalizumab",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "354770",
+          "name": "natalizumab",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "nifedipine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nifedipine",
+        "normalized_text": "nifedipine",
+        "drug_name": "nifedipine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7417",
+        "name": "nifedipine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7417",
+          "name": "nifedipine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "nimodipine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nimodipine",
+        "normalized_text": "nimodipine",
+        "drug_name": "nimodipine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7426",
+        "name": "nimodipine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7426",
+          "name": "nimodipine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "nitroglycerin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nitroglycerin",
+        "normalized_text": "nitroglycerin",
+        "drug_name": "nitroglycerin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "4917",
+        "name": "nitroglycerin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "4917",
+          "name": "nitroglycerin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "nitroprusside",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nitroprusside",
+        "normalized_text": "nitroprusside",
+        "drug_name": "nitroprusside",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7476",
+        "name": "nitroprusside",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7476",
+          "name": "nitroprusside",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "nizatidine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nizatidine",
+        "normalized_text": "nizatidine",
+        "drug_name": "nizatidine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "42319",
+        "name": "nizatidine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "42319",
+          "name": "nizatidine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "norfloxacin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "norfloxacin",
+        "normalized_text": "norfloxacin",
+        "drug_name": "norfloxacin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7517",
+        "name": "norfloxacin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7517",
+          "name": "norfloxacin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "norfloxacin 400 mg uống",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "norfloxacin 400 mg uống",
+        "normalized_text": "norfloxacin 400 mg uống",
+        "drug_name": "norfloxacin",
+        "strength": {
+          "value": "400",
+          "unit": "mg"
+        },
+        "dose_form": null,
+        "route": "oral",
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7517",
+        "name": "norfloxacin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7517",
+          "name": "norfloxacin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "nortriptyline",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nortriptyline",
+        "normalized_text": "nortriptyline",
+        "drug_name": "nortriptyline",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7531",
+        "name": "nortriptyline",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7531",
+          "name": "nortriptyline",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "octreotide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "octreotide",
+        "normalized_text": "octreotide",
+        "drug_name": "octreotide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7617",
+        "name": "octreotide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7617",
+          "name": "octreotide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "olopatadine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "olopatadine",
+        "normalized_text": "olopatadine",
+        "drug_name": "olopatadine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "135391",
+        "name": "olopatadine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "135391",
+          "name": "olopatadine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "olopatadine hydrochloride",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "olopatadine hydrochloride",
+        "normalized_text": "olopatadine hydrochloride",
+        "drug_name": "olopatadine hydrochloride",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "236599",
+        "name": "olopatadine hydrochloride",
+        "tty": "PIN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "236599",
+          "name": "olopatadine hydrochloride",
+          "tty": "PIN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "omeprazole",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "omeprazole",
+        "normalized_text": "omeprazole",
+        "drug_name": "omeprazole",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "7646",
+        "name": "omeprazole",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "7646",
+          "name": "omeprazole",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "panitumumab",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "panitumumab",
+        "normalized_text": "panitumumab",
+        "drug_name": "panitumumab",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "263034",
+        "name": "panitumumab",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "263034",
+          "name": "panitumumab",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "pantoprazole",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "pantoprazole",
+        "normalized_text": "pantoprazole",
+        "drug_name": "pantoprazole",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "40790",
+        "name": "pantoprazole",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "40790",
+          "name": "pantoprazole",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "paracetamol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "paracetamol",
+        "normalized_text": "paracetamol",
+        "drug_name": "paracetamol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "161",
+        "name": "acetaminophen",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "161",
+          "name": "acetaminophen",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "verified_spelling_alias",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "phenylephrine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "phenylephrine",
+        "normalized_text": "phenylephrine",
+        "drug_name": "phenylephrine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8163",
+        "name": "phenylephrine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8163",
+          "name": "phenylephrine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "phenytoin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "phenytoin",
+        "normalized_text": "phenytoin",
+        "drug_name": "phenytoin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8183",
+        "name": "phenytoin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8183",
+          "name": "phenytoin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "piperacillin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "piperacillin",
+        "normalized_text": "piperacillin",
+        "drug_name": "piperacillin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8339",
+        "name": "piperacillin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8339",
+          "name": "piperacillin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "piroxicam",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "piroxicam",
+        "normalized_text": "piroxicam",
+        "drug_name": "piroxicam",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8356",
+        "name": "piroxicam",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8356",
+          "name": "piroxicam",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "prasugrel",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "prasugrel",
+        "normalized_text": "prasugrel",
+        "drug_name": "prasugrel",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "613391",
+        "name": "prasugrel",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "613391",
+          "name": "prasugrel",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "praziquantel",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "praziquantel",
+        "normalized_text": "praziquantel",
+        "drug_name": "praziquantel",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8628",
+        "name": "praziquantel",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8628",
+          "name": "praziquantel",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "prednisone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "prednisone",
+        "normalized_text": "prednisone",
+        "drug_name": "prednisone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8640",
+        "name": "prednisone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8640",
+          "name": "prednisone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "primidone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "primidone",
+        "normalized_text": "primidone",
+        "drug_name": "primidone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8691",
+        "name": "primidone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8691",
+          "name": "primidone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "procainamide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "procainamide",
+        "normalized_text": "procainamide",
+        "drug_name": "procainamide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8700",
+        "name": "procainamide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8700",
+          "name": "procainamide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "propafenone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "propafenone",
+        "normalized_text": "propafenone",
+        "drug_name": "propafenone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8754",
+        "name": "propafenone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8754",
+          "name": "propafenone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "propranolol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "propranolol",
+        "normalized_text": "propranolol",
+        "drug_name": "propranolol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "8787",
+        "name": "propranolol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "8787",
+          "name": "propranolol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "quinidine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "quinidine",
+        "normalized_text": "quinidine",
+        "drug_name": "quinidine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "9068",
+        "name": "quinidine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "9068",
+          "name": "quinidine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "rabeprazole",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "rabeprazole",
+        "normalized_text": "rabeprazole",
+        "drug_name": "rabeprazole",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "114979",
+        "name": "rabeprazole",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "114979",
+          "name": "rabeprazole",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ranitidine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ranitidine",
+        "normalized_text": "ranitidine",
+        "drug_name": "ranitidine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "9143",
+        "name": "ranitidine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "9143",
+          "name": "ranitidine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "rifampin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "rifampin",
+        "normalized_text": "rifampin",
+        "drug_name": "rifampin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "9384",
+        "name": "rifampin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "9384",
+          "name": "rifampin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "rituximab",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "rituximab",
+        "normalized_text": "rituximab",
+        "drug_name": "rituximab",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "121191",
+        "name": "rituximab",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "121191",
+          "name": "rituximab",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "rivaroxaban",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "rivaroxaban",
+        "normalized_text": "rivaroxaban",
+        "drug_name": "rivaroxaban",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1114195",
+        "name": "rivaroxaban",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1114195",
+          "name": "rivaroxaban",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "rivastigmine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "rivastigmine",
+        "normalized_text": "rivastigmine",
+        "drug_name": "rivastigmine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "183379",
+        "name": "rivastigmine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "183379",
+          "name": "rivastigmine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "sertraline",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "sertraline",
+        "normalized_text": "sertraline",
+        "drug_name": "sertraline",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "36437",
+        "name": "sertraline",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "36437",
+          "name": "sertraline",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "simethicone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "simethicone",
+        "normalized_text": "simethicone",
+        "drug_name": "simethicone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "9796",
+        "name": "simethicone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "9796",
+          "name": "simethicone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "sorafenib",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "sorafenib",
+        "normalized_text": "sorafenib",
+        "drug_name": "sorafenib",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "495881",
+        "name": "sorafenib",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "495881",
+          "name": "sorafenib",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "sotalol",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "sotalol",
+        "normalized_text": "sotalol",
+        "drug_name": "sotalol",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "9947",
+        "name": "sotalol",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "9947",
+          "name": "sotalol",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "sulfasalazine",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "sulfasalazine",
+        "normalized_text": "sulfasalazine",
+        "drug_name": "sulfasalazine",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "9524",
+        "name": "sulfasalazine",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "9524",
+          "name": "sulfasalazine",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "sumatriptan",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "sumatriptan",
+        "normalized_text": "sumatriptan",
+        "drug_name": "sumatriptan",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "37418",
+        "name": "sumatriptan",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "37418",
+          "name": "sumatriptan",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "tacrolimus",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "tacrolimus",
+        "normalized_text": "tacrolimus",
+        "drug_name": "tacrolimus",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "42316",
+        "name": "tacrolimus",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "42316",
+          "name": "tacrolimus",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "tazobactam",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "tazobactam",
+        "normalized_text": "tazobactam",
+        "drug_name": "tazobactam",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "37617",
+        "name": "tazobactam",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "37617",
+          "name": "tazobactam",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "terlipressin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "terlipressin",
+        "normalized_text": "terlipressin",
+        "drug_name": "terlipressin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "57048",
+        "name": "terlipressin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "57048",
+          "name": "terlipressin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "tetracycline",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "tetracycline",
+        "normalized_text": "tetracycline",
+        "drug_name": "tetracycline",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "10395",
+        "name": "tetracycline",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "10395",
+          "name": "tetracycline",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "thalidomide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "thalidomide",
+        "normalized_text": "thalidomide",
+        "drug_name": "thalidomide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "10432",
+        "name": "thalidomide",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "10432",
+          "name": "thalidomide",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "ticagrelor",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ticagrelor",
+        "normalized_text": "ticagrelor",
+        "drug_name": "ticagrelor",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "1116632",
+        "name": "ticagrelor",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "1116632",
+          "name": "ticagrelor",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "tiêm vitamin k",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "tiêm vitamin k",
+        "normalized_text": "tiêm vitamin k",
+        "drug_name": "vitamin k",
+        "strength": null,
+        "dose_form": "injection",
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "11258",
+        "name": "vitamin K",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "11258",
+          "name": "vitamin K",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "topiramate",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "topiramate",
+        "normalized_text": "topiramate",
+        "drug_name": "topiramate",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "38404",
+        "name": "topiramate",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "38404",
+          "name": "topiramate",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "trazodone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "trazodone",
+        "normalized_text": "trazodone",
+        "drug_name": "trazodone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "10737",
+        "name": "trazodone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "10737",
+          "name": "trazodone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "triamcinolone",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "triamcinolone",
+        "normalized_text": "triamcinolone",
+        "drug_name": "triamcinolone",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "10759",
+        "name": "triamcinolone",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "10759",
+          "name": "triamcinolone",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "vancomycin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "vancomycin",
+        "normalized_text": "vancomycin",
+        "drug_name": "vancomycin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "11124",
+        "name": "vancomycin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "11124",
+          "name": "vancomycin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "verapamil",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "verapamil",
+        "normalized_text": "verapamil",
+        "drug_name": "verapamil",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "11170",
+        "name": "verapamil",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "11170",
+          "name": "verapamil",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "vitamin a",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "vitamin a",
+        "normalized_text": "vitamin a",
+        "drug_name": "vitamin a",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "11246",
+        "name": "vitamin A",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "11246",
+          "name": "vitamin A",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "vitamin b12",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "vitamin b12",
+        "normalized_text": "vitamin b12",
+        "drug_name": "vitamin b12",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "11248",
+        "name": "vitamin B12",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "11248",
+          "name": "vitamin B12",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "vitamin d",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "vitamin d",
+        "normalized_text": "vitamin d",
+        "drug_name": "vitamin d",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "11253",
+        "name": "vitamin D",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "11253",
+          "name": "vitamin D",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "vitamin e",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "vitamin e",
+        "normalized_text": "vitamin e",
+        "drug_name": "vitamin e",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "11256",
+        "name": "vitamin E",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "11256",
+          "name": "vitamin E",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    },
+    {
+      "original_text": "warfarin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "warfarin",
+        "normalized_text": "warfarin",
+        "drug_name": "warfarin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": {
+        "rxcui": "11289",
+        "name": "warfarin",
+        "tty": "IN"
+      },
+      "ingredient_concepts": [
+        {
+          "rxcui": "11289",
+          "name": "warfarin",
+          "tty": "IN"
+        }
+      ],
+      "mapping_method": "exact_rxnorm",
+      "confidence": 1.0,
+      "status": "verified",
+      "candidates": []
+    }
+  ],
+  "review": [
+    {
+      "original_text": "ampiciilin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ampiciilin",
+        "normalized_text": "ampiciilin",
+        "drug_name": "ampiciilin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "ampiciilin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "733",
+          "name": "ampicillin",
+          "tty": "IN",
+          "normalized_name": "ampicillin",
+          "score": 0.9
+        }
+      ]
+    },
+    {
+      "original_text": "cyclophosphamid",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cyclophosphamid",
+        "normalized_text": "cyclophosphamid",
+        "drug_name": "cyclophosphamid",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "cyclophosphamid",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9677,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "3002",
+          "name": "cyclophosphamide",
+          "tty": "IN",
+          "normalized_name": "cyclophosphamide",
+          "score": 0.9677
+        }
+      ]
+    },
+    {
+      "original_text": "cyclophosphomide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cyclophosphomide",
+        "normalized_text": "cyclophosphomide",
+        "drug_name": "cyclophosphomide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "cyclophosphomide",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9375,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "3002",
+          "name": "cyclophosphamide",
+          "tty": "IN",
+          "normalized_name": "cyclophosphamide",
+          "score": 0.9375
+        }
+      ]
+    },
+    {
+      "original_text": "cyclosporin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "cyclosporin",
+        "normalized_text": "cyclosporin",
+        "drug_name": "cyclosporin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "cyclosporin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9565,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "3008",
+          "name": "cyclosporine",
+          "tty": "IN",
+          "normalized_name": "cyclosporine",
+          "score": 0.9565
+        }
+      ]
+    },
+    {
+      "original_text": "dicyclomin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "dicyclomin",
+        "normalized_text": "dicyclomin",
+        "drug_name": "dicyclomin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "dicyclomin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9524,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "3361",
+          "name": "dicyclomine",
+          "tty": "IN",
+          "normalized_name": "dicyclomine",
+          "score": 0.9524
+        }
+      ]
+    },
+    {
+      "original_text": "dronedaron",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "dronedaron",
+        "normalized_text": "dronedaron",
+        "drug_name": "dronedaron",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "dronedaron",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9524,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "233698",
+          "name": "dronedarone",
+          "tty": "IN",
+          "normalized_name": "dronedarone",
+          "score": 0.9524
+        }
+      ]
+    },
+    {
+      "original_text": "flecanide",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "flecanide",
+        "normalized_text": "flecanide",
+        "drug_name": "flecanide",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "flecanide",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9474,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "4441",
+          "name": "flecainide",
+          "tty": "IN",
+          "normalized_name": "flecainide",
+          "score": 0.9474
+        }
+      ]
+    },
+    {
+      "original_text": "huperzin a",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "huperzin a",
+        "normalized_text": "huperzin a",
+        "drug_name": "huperzin a",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "huperzin a",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9524,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "2267703",
+          "name": "huperzine A",
+          "tty": "IN",
+          "normalized_name": "huperzine a",
+          "score": 0.9524
+        }
+      ]
+    },
+    {
+      "original_text": "isosorbide dinitrat",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "isosorbide dinitrat",
+        "normalized_text": "isosorbide dinitrat",
+        "drug_name": "isosorbide dinitrat",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "isosorbide dinitrat",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9744,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "6058",
+          "name": "isosorbide dinitrate",
+          "tty": "IN",
+          "normalized_name": "isosorbide dinitrate",
+          "score": 0.9744
+        }
+      ]
+    },
+    {
+      "original_text": "ivabradin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "ivabradin",
+        "normalized_text": "ivabradin",
+        "drug_name": "ivabradin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "ivabradin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9474,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "1649480",
+          "name": "ivabradine",
+          "tty": "IN",
+          "normalized_name": "ivabradine",
+          "score": 0.9474
+        }
+      ]
+    },
+    {
+      "original_text": "loratadin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "loratadin",
+        "normalized_text": "loratadin",
+        "drug_name": "loratadin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "loratadin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9474,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "28889",
+          "name": "loratadine",
+          "tty": "IN",
+          "normalized_name": "loratadine",
+          "score": 0.9474
+        }
+      ]
+    },
+    {
+      "original_text": "luticasone furoate",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "luticasone furoate",
+        "normalized_text": "luticasone furoate",
+        "drug_name": "luticasone furoate",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "luticasone furoate",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.973,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "705022",
+          "name": "fluticasone furoate",
+          "tty": "PIN",
+          "normalized_name": "fluticasone furoate",
+          "score": 0.973
+        }
+      ]
+    },
+    {
+      "original_text": "magnesi sulfat",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "magnesi sulfat",
+        "normalized_text": "magnesi sulfat",
+        "drug_name": "magnesi sulfat",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "magnesi sulfat",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9032,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "6585",
+          "name": "magnesium sulfate",
+          "tty": "IN",
+          "normalized_name": "magnesium sulfate",
+          "score": 0.9032
+        }
+      ]
+    },
+    {
+      "original_text": "mexiletin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "mexiletin",
+        "normalized_text": "mexiletin",
+        "drug_name": "mexiletin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "mexiletin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9474,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "6926",
+          "name": "mexiletine",
+          "tty": "IN",
+          "normalized_name": "mexiletine",
+          "score": 0.9474
+        }
+      ]
+    },
+    {
+      "original_text": "nortripxyline",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nortripxyline",
+        "normalized_text": "nortripxyline",
+        "drug_name": "nortripxyline",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "nortripxyline",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9231,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "7531",
+          "name": "nortriptyline",
+          "tty": "IN",
+          "normalized_name": "nortriptyline",
+          "score": 0.9231
+        }
+      ]
+    },
+    {
+      "original_text": "nterferon beta - 1a",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "nterferon beta - 1a",
+        "normalized_text": "nterferon beta - 1a",
+        "drug_name": "nterferon beta - 1a",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "nterferon beta - 1a",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9189,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "75917",
+          "name": "interferon beta-1a",
+          "tty": "IN",
+          "normalized_name": "interferon beta-1a",
+          "score": 0.9189
+        }
+      ]
+    },
+    {
+      "original_text": "omega - 3 fatty acid",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "omega - 3 fatty acid",
+        "normalized_text": "omega - 3 fatty acid",
+        "drug_name": "omega - 3 fatty acid",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "omega - 3 fatty acid",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9231,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "4301",
+          "name": "omega-3 fatty acids",
+          "tty": "IN",
+          "normalized_name": "omega-3 fatty acids",
+          "score": 0.9231
+        }
+      ]
+    },
+    {
+      "original_text": "paroxetin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "paroxetin",
+        "normalized_text": "paroxetin",
+        "drug_name": "paroxetin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "paroxetin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9474,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "32937",
+          "name": "paroxetine",
+          "tty": "IN",
+          "normalized_name": "paroxetine",
+          "score": 0.9474
+        }
+      ]
+    },
+    {
+      "original_text": "penicillin",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "penicillin",
+        "normalized_text": "penicillin",
+        "drug_name": "penicillin",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "penicillin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9091,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "7980",
+          "name": "penicillin G",
+          "tty": "IN",
+          "normalized_name": "penicillin g",
+          "score": 0.9091
+        },
+        {
+          "rxcui": "7984",
+          "name": "penicillin V",
+          "tty": "IN",
+          "normalized_name": "penicillin v",
+          "score": 0.9091
+        }
+      ]
+    },
+    {
+      "original_text": "penicillin uống",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "penicillin uống",
+        "normalized_text": "penicillin uống",
+        "drug_name": "penicillin",
+        "strength": null,
+        "dose_form": null,
+        "route": "oral",
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "penicillin",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9091,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "7980",
+          "name": "penicillin G",
+          "tty": "IN",
+          "normalized_name": "penicillin g",
+          "score": 0.9091
+        },
+        {
+          "rxcui": "7984",
+          "name": "penicillin V",
+          "tty": "IN",
+          "normalized_name": "penicillin v",
+          "score": 0.9091
+        }
+      ]
+    },
+    {
+      "original_text": "vitamin b 12",
+      "entity_class": "DRUG",
+      "parsed": {
+        "raw_text": "vitamin b 12",
+        "normalized_text": "vitamin b 12",
+        "drug_name": "vitamin b 12",
+        "strength": null,
+        "dose_form": null,
+        "route": null,
+        "frequency": null,
+        "prn": false
+      },
+      "selected_concept": null,
+      "ingredient_concepts": [
+        {
+          "rxcui": null,
+          "name": "vitamin b 12",
+          "tty": null
+        }
+      ],
+      "mapping_method": "fuzzy_candidate_retrieval",
+      "confidence": 0.9565,
+      "status": "review",
+      "candidates": [
+        {
+          "rxcui": "11248",
+          "name": "vitamin B12",
+          "tty": "IN",
+          "normalized_name": "vitamin b12",
+          "score": 0.9565
+        }
+      ]
+    }
+  ],
+  "not_found": []
+}

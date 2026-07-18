@@ -1,0 +1,18 @@
+{
+  "total_checked": 147,
+  "total_pass": 12,
+  "total_flagged": 0,
+  "total_errors": 135,
+  "pass_rate": 0.0816,
+  "status_counts": {
+    "PASS": 12,
+    "ERROR": 135
+  },
+  "medical_model": "llama-3.3-70b-versatile",
+  "top_issues": [],
+  "output_files": {
+    "pass": "work\\validated\\validated_pass.jsonl",
+    "flagged": "work\\validated\\validated_flagged.jsonl",
+    "errors": "work\\validated\\validation_errors.jsonl"
+  }
+}

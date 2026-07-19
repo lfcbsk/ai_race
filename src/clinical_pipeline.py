@@ -37,9 +37,14 @@ class ClinicalPipelineResult:
     links: list[LinkingResult] = field(default_factory=list)
     validation: OutputValidationResult = field(default_factory=OutputValidationResult)
 
-    def competition_output(self, *, strict: bool = True) -> dict[str, Any]:
+    def competition_output(
+        self, *, strict: bool = True, include_text: bool = False
+    ) -> dict[str, Any]:
         return serialize_competition_output(
-            self.document, self.entities, strict=strict
+            self.document,
+            self.entities,
+            strict=strict,
+            include_text=include_text,
         )
 
 
@@ -103,11 +108,10 @@ class ClinicalNLPPipeline:
 
 def build_default_medical_linker(
     *,
-    icd_path: str | Path = "work/icd_mapping_final.json",
-    drug_path: str | Path = "work/drug_mapping_final.json",
+    icd_path: str | Path = "data/icd_mapping_final.json",
+    drug_path: str | Path = "data/drug_mapping_final.json",
 ) -> MedicalEntityLinker:
     return MedicalEntityLinker(
         icd_linker=HybridEntityLinker(load_icd_entries(icd_path)),
         drug_linker=HybridEntityLinker(load_rxnorm_entries(drug_path)),
     )
-

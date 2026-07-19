@@ -11,8 +11,8 @@
   "medical_model": "llama-3.3-70b-versatile",
   "top_issues": [],
   "output_files": {
-    "pass": "work\\validated\\validated_pass.jsonl",
-    "flagged": "work\\validated\\validated_flagged.jsonl",
-    "errors": "work\\validated\\validation_errors.jsonl"
+    "pass": "data\\validated\\validated_pass.jsonl",
+    "flagged": "data\\validated\\validated_flagged.jsonl",
+    "errors": "data\\validated\\validation_errors.jsonl"
   }
 }

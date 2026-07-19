@@ -3,7 +3,7 @@
 VALIDATION GATE — dùng model y khoa riêng để double-check synthetic
 note sau khi build_synthetic_data.py generate đã chạy xong.
 
-Đọc work/generated/contents.jsonl + labels.jsonl, gửi từng note cho
+Đọc data/generated/contents.jsonl + labels.jsonl, gửi từng note cho
 1 model chấm y khoa qua API OpenAI-compatible để kiểm tra:
     1. Tính hợp lý lâm sàng (triệu chứng/chẩn đoán/thuốc có phi lý không)
     2. Assertion (isHistorical/isNegated/isFamily) có đúng nghĩa thật không
@@ -14,10 +14,10 @@ CHẠY:
     python validate_medical.py run --limit 50   # test thử 50 note đầu
 
 OUTPUT:
-    work/validated/validated_pass.jsonl      # note pass, dùng để train
-    work/validated/validated_flagged.jsonl   # note bị flag kèm lý do
-    work/validated/validation_errors.jsonl   # lỗi API/kỹ thuật, không kết luận note sai
-    work/validated/validation_report.json    # thống kê tổng
+    data/validated/validated_pass.jsonl      # note pass, dùng để train
+    data/validated/validated_flagged.jsonl   # note bị flag kèm lý do
+    data/validated/validation_errors.jsonl   # lỗi API/kỹ thuật, không kết luận note sai
+    data/validated/validation_report.json    # thống kê tổng
 =====================================================================
 """
 
@@ -34,7 +34,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-WORK = Path("work")
+WORK = Path("data")
 GENERATED_DIR = WORK / "generated"
 VALIDATED_DIR = WORK / "validated"
 VALIDATED_DIR.mkdir(exist_ok=True, parents=True)

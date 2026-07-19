@@ -2,7 +2,7 @@
 .env
 .env.*
 !.env.example
-
+*.txt
 # Python bytecode/cache
 __pycache__/
 *.py[cod]
@@ -28,3 +28,11 @@ env/
 # Notebook and local tool/model caches
 .ipynb_checkpoints/
 .cache/
+
+# Local model checkpoints and training runs
+models/
+checkpoints/
+runs/
+
+# Generated competition predictions and per-file inference errors
+data/test_set/output/

@@ -23,6 +23,17 @@ from .postprocess import (
     postprocess_predictions,
     resolve_overlaps,
 )
+from .trainer import (
+    NERTrainerConfig,
+    NERTrainingResult,
+    fine_tune_gliner,
+    load_gliner_dataset,
+    prepare_synthetic_ner_dataset,
+    split_gliner_dataset,
+    train_from_synthetic,
+    validate_gliner_dataset,
+    validate_gliner_sample,
+)
 
 __all__ = [
     "DatasetBuildResult",
@@ -47,4 +58,13 @@ __all__ = [
     "predict_documents",
     "resolve_overlaps",
     "score_document",
+    "NERTrainerConfig",
+    "NERTrainingResult",
+    "fine_tune_gliner",
+    "load_gliner_dataset",
+    "prepare_synthetic_ner_dataset",
+    "split_gliner_dataset",
+    "train_from_synthetic",
+    "validate_gliner_dataset",
+    "validate_gliner_sample",
 ]

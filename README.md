@@ -55,7 +55,7 @@ from src.linking import (
     load_icd_entries,
 )
 
-entries = load_icd_entries("work/icd_mapping_final.json")
+entries = load_icd_entries("data/icd_mapping_final.json")
 dense = SentenceTransformerDenseRetriever(
     entries,
     "models/bge-m3",
@@ -93,17 +93,93 @@ from src.preprocessing import (
 )
 
 split = load_synthetic_data(
-    "work/generated/contents.jsonl",
-    "work/generated/labels.jsonl",
+    "data/generated/contents.jsonl",
+    "data/generated/labels.jsonl",
 )
 documents = synthetic_to_documents(split)
 result = build_gliner_dataset(
     documents,
     on_error="skip",
-    error_log_path="work/gliner_dataset_errors.jsonl",
+    error_log_path="data/gliner_dataset_errors.jsonl",
 )
 train_data = result.samples
 ```
+
+## Fine-tune GLiNER NER
+
+Kiểm tra dataset và split mà chưa load model:
+
+```bash
+python -m src.train_ner `
+  --contents data/generated/contents.jsonl `
+  --labels data/generated/labels.jsonl `
+  --model models/gliner-base `
+  --output models/medical-gliner `
+  --validation-ratio 0.1 `
+  --dry-run
+```
+
+Chạy fine-tuning local:
+
+```bash
+python -m src.train_ner `
+  --contents data/generated/contents.jsonl `
+  --labels data/generated/labels.jsonl `
+  --model models/gliner-base `
+  --output models/medical-gliner `
+  --max-steps 2000 `
+  --batch-size 8 `
+  --device cuda `
+  --bf16
+```
+
+Mặc định `--model` phải là đường dẫn local. Trainer ghi lại:
+
+```text
+models/medical-gliner/
+├── train_dataset.json
+├── eval_dataset.json
+├── dataset_errors.jsonl
+├── training_manifest.json
+└── checkpoint/model files
+```
+
+## Chạy test set và sinh output
+
+Kiểm tra toàn bộ input trước, bước này không load model:
+
+```powershell
+python -m src.run_inference --dry-run
+```
+
+Sau khi checkpoint fine-tune đã nằm ở `models/medical-gliner`, chạy local bằng GPU:
+
+```powershell
+python -m src.run_inference `
+  --input data/test_set/input `
+  --model models/medical-gliner `
+  --device cuda `
+  --output data/test_set/output/predictions.jsonl
+```
+
+Nếu máy không có CUDA, đổi `--device cuda` thành `--device cpu`. Kết quả gồm:
+
+```text
+data/test_set/output/
+├── predictions.jsonl
+└── prediction_errors.jsonl
+```
+
+Mỗi dòng của `predictions.jsonl` có dạng:
+
+```json
+{"note_id":"1","entities":[{"text":"...","type":"CHẨN_ĐOÁN","position":[10,20],"assertions":[],"candidates":["I10"]}]}
+```
+
+`note_id` lấy từ tên file (`1.txt` thành `"1"`). Offset trong output luôn được
+map về văn bản gốc. Nếu có file lỗi, chương trình vẫn ghi các sample thành công vào
+output, ghi chi tiết vào `prediction_errors.jsonl`, rồi trả exit code 1 để tránh bỏ
+sót lỗi khi chạy tự động.
 
 ## Test
 

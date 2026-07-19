@@ -29,7 +29,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 RAW = Path("raw")
-WORK = Path("work")
+WORK = Path("data")
 WORK.mkdir(exist_ok=True, parents=True)
 
 
@@ -726,7 +726,7 @@ def sample_assertions() -> list[str]:
 def generate_constraint(pool):
     if not pool.get("diseases"):
         raise ValueError(
-            "Ontology pool chưa có ICD-10 verified. Hãy review work/icd_mapping_final.json "
+            "Ontology pool chưa có ICD-10 verified. Hãy review data/icd_mapping_final.json "
             "và bổ sung alias/verified mapping trước khi generate."
         )
     if not pool.get("symptoms"):

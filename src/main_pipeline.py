@@ -7,7 +7,7 @@ serializer) — mục tiêu duy nhất của file này hiện tại là đo base
 GLiNER pretrained, đúng như Giai đoạn 2 trong roadmap.
 
 CHẠY:
-    python -m src.main_pipeline --gold work/validated/validated_pass.jsonl
+    python -m src.main_pipeline --gold data/validated/validated_pass.jsonl
 
 Cần mạng để tải checkpoint GLiNER lần đầu (từ HuggingFace Hub).
 """
@@ -77,7 +77,7 @@ def _main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--gold",
-        default="work/validated/validated_pass.jsonl",
+        default="data/validated/validated_pass.jsonl",
         help="File jsonl có sẵn field 'entities' để làm gold (mặc định: validated_pass.jsonl).",
     )
     parser.add_argument("--model", default=DEFAULT_MODEL_NAME)

@@ -6,6 +6,23 @@ from .datasets import (
     build_gliner_dataset,
     convert_document_to_ner_sample,
 )
+from .inference import (
+    DEFAULT_LABELS,
+    DEFAULT_MODEL_NAME,
+    GLiNERModel,
+    RawEntityPrediction,
+    load_gliner_model,
+    predict_document,
+    predict_documents,
+)
+from .metrics import NERMetricsReport, TypeMetrics, evaluate_ner, score_document
+from .postprocess import (
+    deduplicate_predictions,
+    filter_by_confidence,
+    map_to_raw_offsets,
+    postprocess_predictions,
+    resolve_overlaps,
+)
 
 __all__ = [
     "DatasetBuildResult",
@@ -14,4 +31,20 @@ __all__ = [
     "NERDatasetError",
     "build_gliner_dataset",
     "convert_document_to_ner_sample",
+    "DEFAULT_LABELS",
+    "DEFAULT_MODEL_NAME",
+    "GLiNERModel",
+    "NERMetricsReport",
+    "RawEntityPrediction",
+    "TypeMetrics",
+    "deduplicate_predictions",
+    "evaluate_ner",
+    "filter_by_confidence",
+    "load_gliner_model",
+    "map_to_raw_offsets",
+    "postprocess_predictions",
+    "predict_document",
+    "predict_documents",
+    "resolve_overlaps",
+    "score_document",
 ]

@@ -23,6 +23,33 @@ class SyntheticData:
     labels: list[dict[str, Any]]
 
 
+def synthetic_to_documents(data: SyntheticData) -> list[MedicalDocument]:
+    """Create labeled documents for training while source collections stay separate."""
+    if len(data.contents) != len(data.labels):
+        raise ValueError("Synthetic contents và labels không cùng số lượng.")
+    documents: list[MedicalDocument] = []
+    for record_number, (content, label) in enumerate(
+        zip(data.contents, data.labels), start=1
+    ):
+        content_id = _extract_document_id(content, "")
+        label_id = _extract_document_id(label, "")
+        if not content_id or content_id != label_id:
+            raise ValueError(
+                f"Synthetic pair {record_number} lệch ID: {content_id!r} != {label_id!r}."
+            )
+        raw_text = _extract_text(content, record_number)
+        entities = _extract_entities(label, raw_text, content_id)
+        documents.append(
+            MedicalDocument(
+                document_id=content_id,
+                raw_text=raw_text,
+                entities=entities,
+                metadata={"source_format": "synthetic_split", "has_labels": True},
+            )
+        )
+    return documents
+
+
 def _print_warning(message: str) -> None:
     """Print a warning without failing on a limited Windows console encoding."""
     output = f"[WARNING] {message}"

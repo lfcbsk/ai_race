@@ -164,8 +164,12 @@ Synthetic content và label luôn lưu riêng. Chúng chỉ được ghép thàn
 Chạy unit test:
 
 ```powershell
-uv run python -m unittest discover -s tests -v
+uv run python -m pytest
 ```
+
+GitHub Actions tại `.github/workflows/pytest.yml` tự chạy pytest bằng Python 3.11
+và 3.12 sau mỗi lần push hoặc khi tạo/cập nhật pull request. CI chỉ cài dependency
+nhóm `dev`, không tải PyTorch hay model vì unit test sử dụng mock model.
 
 Kiểm tra 100 file test mà không load model:
 

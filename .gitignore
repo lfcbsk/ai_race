@@ -1,1 +1,30 @@
-*\.env
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test, lint and type-check caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments and packaging cache
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+
+# Notebook and local tool/model caches
+.ipynb_checkpoints/
+.cache/

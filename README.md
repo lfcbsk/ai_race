@@ -1,116 +1,195 @@
 # Viettel AI Race — Self-hosted Medical NLP
 
-Pipeline production chạy local, không gọi API khi inference:
+Pipeline xử lý hồ sơ y tế tiếng Việt chạy local:
 
 ```text
-MedicalDocument
-  → normalize + raw/normalized offset map
+TXT test set
+  → MedicalDocument
+  → normalize + offset map
   → GLiNER NER
-  → deduplicate / overlap / confidence / raw offsets
-  → assertion rules + scope + optional local 3B-4B verifier
-  → ICD-10 / RxNorm exact + BM25 + optional dense + RRF
-  → optional BGE cross-encoder reranker
-  → optional local 3B-4B disambiguator
-  → validation + competition output
+  → lọc confidence / deduplicate / map về raw offset
+  → assertion: isNegated / isHistorical / isFamily
+  → ICD-10 và RxNorm linking
+  → validate schema
+  → predictions.jsonl
 ```
 
-## Chạy dependency-free với mock/local model
+Inference mặc định không gọi API. GLiNER chạy từ checkpoint local; assertion dùng
+rule local; linking dùng ontology JSON, exact match, BM25 và lexical reranker.
 
-Các tầng rule, scope, exact alias, BM25, RRF, lexical reranker, validation và
-serializer chỉ dùng Python standard library. `ClinicalNLPPipeline` nhận một model
-có interface `predict_entities`, nên có thể inject GLiNER thật hoặc mock trong test.
+## 1. Yêu cầu
 
-```python
-from src.clinical_pipeline import (
-    ClinicalNLPPipeline,
-    build_default_medical_linker,
-)
-from src.ner import load_gliner_model
-from src.preprocessing import load_documents
+- Windows, Linux hoặc macOS.
+- `uv`.
+- Python 3.11 hoặc 3.12; khuyến nghị Python 3.12.
+- Khoảng 5 GB trống cho environment và model GLiNER.
+- NVIDIA GPU được khuyến nghị khi fine-tune. Inference có thể chạy CPU.
 
-model = load_gliner_model("models/gliner-medical", device="cpu")
-pipeline = ClinicalNLPPipeline(
-    model,
-    entity_linker=build_default_medical_linker(),
-)
+Kiểm tra `uv`:
 
-for document in load_documents("notes.jsonl"):
-    result = pipeline.process(document)
-    print(result.competition_output())
+```powershell
+uv --version
 ```
 
-`load_gliner_model` chỉ tải mạng nếu truyền Hugging Face model ID chưa có trong
-cache. Trong môi trường cuộc thi, dùng đường dẫn checkpoint local.
+Nếu chưa có `uv`, cài trên Windows PowerShell:
 
-## Bật hybrid retrieval đầy đủ
-
-Các adapter model nặng được lazy-import và không bắt buộc cho test cơ bản:
-
-```python
-from src.linking import (
-    CandidateGenerator,
-    CrossEncoderReranker,
-    HybridEntityLinker,
-    SentenceTransformerDenseRetriever,
-    load_icd_entries,
-)
-
-entries = load_icd_entries("data/icd_mapping_final.json")
-dense = SentenceTransformerDenseRetriever(
-    entries,
-    "models/bge-m3",
-    local_files_only=True,
-)
-generator = CandidateGenerator(entries, dense=dense)
-reranker = CrossEncoderReranker(
-    "models/bge-reranker-v2-m3",
-    local_files_only=True,
-)
-icd_linker = HybridEntityLinker(
-    entries,
-    candidate_generator=generator,
-    reranker=reranker,
-)
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-Model đề xuất được lưu local:
+Tài liệu chính thức: <https://docs.astral.sh/uv/getting-started/installation/>
 
-- NER: GLiNER checkpoint đã fine-tune.
-- Dense: `BAAI/bge-m3`.
-- Reranker: `BAAI/bge-reranker-v2-m3`.
-- Verify/disambiguation tùy chọn: Qwen 3B-4B hoặc Llama 3B instruct.
+## 2. Tạo environment và cài package
 
-## Chuẩn bị training data GLiNER
+Chạy tại thư mục gốc của repository:
 
-Content và label synthetic vẫn lưu riêng. Chỉ tạo `MedicalDocument` trong RAM ở
-thời điểm build dataset:
-
-```python
-from src.ner import build_gliner_dataset
-from src.preprocessing import (
-    load_synthetic_data,
-    synthetic_to_documents,
-)
-
-split = load_synthetic_data(
-    "data/generated/contents.jsonl",
-    "data/generated/labels.jsonl",
-)
-documents = synthetic_to_documents(split)
-result = build_gliner_dataset(
-    documents,
-    on_error="skip",
-    error_log_path="data/gliner_dataset_errors.jsonl",
-)
-train_data = result.samples
+```powershell
+uv python install 3.12
+uv sync --python 3.12
 ```
 
-## Fine-tune GLiNER NER
+`uv sync` tự tạo `.venv`, đọc `pyproject.toml` và cài các package chính:
 
-Kiểm tra dataset và split mà chưa load model:
+- `torch`: chạy và fine-tune model.
+- `gliner`: NER inference/training.
+- `huggingface-hub`: tải checkpoint bằng CLI `hf`.
+- `rapidfuzz`, `pandas`: xử lý ontology và synthetic data.
+- `requests`, `python-dotenv`: các script generation/validation có API.
 
-```bash
-python -m src.train_ner `
+Không cần activate virtual environment khi dùng `uv run`. Kiểm tra cài đặt:
+
+```powershell
+uv run python -c "import torch, gliner; print(torch.__version__); print('CUDA:', torch.cuda.is_available())"
+```
+
+### Package tùy chọn
+
+Chỉ cài dense retrieval:
+
+```powershell
+uv sync --extra retrieval
+```
+
+Cài mọi dependency, gồm dense retrieval và Google Gemini generation:
+
+```powershell
+uv sync --all-extras
+```
+
+Pipeline CLI mặc định không cần hai extra này.
+
+### PyTorch GPU
+
+Trên máy NVIDIA đã cài driver, để `uv` tự chọn PyTorch backend tương thích:
+
+```powershell
+uv sync --python 3.12
+uv pip install --reinstall torch --torch-backend=auto
+uv run python -c "import torch; print(torch.cuda.is_available(), torch.version.cuda)"
+```
+
+Nếu kết quả đầu tiên là `False`, chạy với `--device cpu`. Không dùng `--bf16` trên
+CPU. Xem hướng dẫn PyTorch của uv tại
+<https://docs.astral.sh/uv/guides/integration/pytorch/>.
+
+## 3. Model cần tải
+
+### Bắt buộc: GLiNER multilingual
+
+| Mục đích | Hugging Face ID | Thư mục local | Bắt buộc |
+|---|---|---|---|
+| NER baseline và base checkpoint để fine-tune | `urchade/gliner_multi-v2.1` | `models/gliner-base` | Có |
+| Model NER sau fine-tune | Không tải; trainer tự sinh | `models/medical-gliner` | Có cho output cuối |
+
+Tải model base khoảng 2.31 GB:
+
+```powershell
+uv run hf download urchade/gliner_multi-v2.1 `
+  --local-dir models/gliner-base
+```
+
+Model: <https://huggingface.co/urchade/gliner_multi-v2.1>
+
+Kiểm tra model đã tải:
+
+```powershell
+Get-ChildItem models/gliner-base
+```
+
+Không cần token Hugging Face vì model public. Khi nộp/chạy self-hosted, copy cả
+thư mục `models/medical-gliner` sang máy inference; không truyền Hugging Face ID.
+
+### Model tùy chọn — chưa được bật trong CLI mặc định
+
+| Thành phần | Hugging Face ID | Khi nào cần |
+|---|---|---|
+| Dense retrieval | `BAAI/bge-m3` | Muốn semantic retrieval cho ICD/RxNorm |
+| Cross-encoder reranker | `BAAI/bge-reranker-v2-m3` | Muốn rerank candidate bằng model |
+| Assertion/linking verifier | Qwen/Llama instruct local | Muốn kiểm tra rule hoặc disambiguation bằng LLM |
+
+Chỉ tải BGE nếu bạn đã cài extra `retrieval` và tự cấu hình các adapter trong
+`src/linking`:
+
+```powershell
+uv run hf download BAAI/bge-m3 --local-dir models/bge-m3
+uv run hf download BAAI/bge-reranker-v2-m3 `
+  --local-dir models/bge-reranker-v2-m3
+```
+
+Hai model BGE không làm thay đổi kết quả của `src.run_inference` hiện tại vì CLI
+đang dùng linker lexical mặc định.
+
+## 4. Cấu trúc dữ liệu
+
+```text
+data/
+├── generated/
+│   ├── contents.jsonl
+│   └── labels.jsonl
+├── validated/
+│   └── validated_pass.jsonl
+├── test_set/
+│   └── input/
+│       ├── 1.txt
+│       └── ...
+├── icd_mapping_final.json
+└── drug_mapping_final.json
+```
+
+Synthetic content và label luôn lưu riêng. Chúng chỉ được ghép thành
+`MedicalDocument` trong RAM khi chuẩn bị fine-tuning.
+
+## 5. Kiểm tra project
+
+Chạy unit test:
+
+```powershell
+uv run python -m unittest discover -s tests -v
+```
+
+Kiểm tra 100 file test mà không load model:
+
+```powershell
+uv run python -m src.run_inference --dry-run
+```
+
+Kết quả dự kiến:
+
+```json
+{
+  "num_files": 100,
+  "first_note_id": "1",
+  "last_note_id": "100"
+}
+```
+
+## 6. Kiểm tra training data
+
+Bước này preprocess synthetic data, map raw offset sang normalized offset, kiểm
+tra entity text và chuyển sang format GLiNER. Chưa load model và chưa train:
+
+```powershell
+uv run python -m src.train_ner `
   --contents data/generated/contents.jsonl `
   --labels data/generated/labels.jsonl `
   --model models/gliner-base `
@@ -119,10 +198,25 @@ python -m src.train_ner `
   --dry-run
 ```
 
-Chạy fine-tuning local:
+Với dữ liệu hiện tại, kết quả dự kiến:
 
-```bash
-python -m src.train_ner `
+```json
+{
+  "train_samples": 194,
+  "eval_samples": 22,
+  "dataset_errors": 1
+}
+```
+
+Sample lỗi bị loại khỏi training; khi train thật, chi tiết được ghi vào
+`models/medical-gliner/dataset_errors.jsonl`.
+
+## 7. Fine-tune GLiNER
+
+### NVIDIA GPU
+
+```powershell
+uv run python -m src.train_ner `
   --contents data/generated/contents.jsonl `
   --labels data/generated/labels.jsonl `
   --model models/gliner-base `
@@ -133,7 +227,23 @@ python -m src.train_ner `
   --bf16
 ```
 
-Mặc định `--model` phải là đường dẫn local. Trainer ghi lại:
+Nếu hết VRAM, giảm `--batch-size` xuống `4`, `2` hoặc `1`. Chỉ dùng `--bf16` khi
+GPU hỗ trợ BF16.
+
+### CPU
+
+```powershell
+uv run python -m src.train_ner `
+  --contents data/generated/contents.jsonl `
+  --labels data/generated/labels.jsonl `
+  --model models/gliner-base `
+  --output models/medical-gliner `
+  --max-steps 2000 `
+  --batch-size 2 `
+  --device cpu
+```
+
+Fine-tune CPU có thể rất chậm. Sau training:
 
 ```text
 models/medical-gliner/
@@ -141,28 +251,46 @@ models/medical-gliner/
 ├── eval_dataset.json
 ├── dataset_errors.jsonl
 ├── training_manifest.json
-└── checkpoint/model files
+└── model/checkpoint files
 ```
 
-## Chạy test set và sinh output
+## 8. Chạy test set ra output
 
-Kiểm tra toàn bộ input trước, bước này không load model:
+### Output baseline, chưa fine-tune
+
+Dùng để kiểm tra end-to-end; chất lượng NER chưa phải kết quả cuối:
 
 ```powershell
-python -m src.run_inference --dry-run
+uv run python -m src.run_inference `
+  --input data/test_set/input `
+  --model models/gliner-base `
+  --device cpu `
+  --output data/test_set/output/baseline_predictions.jsonl
 ```
 
-Sau khi checkpoint fine-tune đã nằm ở `models/medical-gliner`, chạy local bằng GPU:
+### Output cuối bằng model fine-tune
+
+CPU:
 
 ```powershell
-python -m src.run_inference `
+uv run python -m src.run_inference `
+  --input data/test_set/input `
+  --model models/medical-gliner `
+  --device cpu `
+  --output data/test_set/output/predictions.jsonl
+```
+
+NVIDIA GPU:
+
+```powershell
+uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/medical-gliner `
   --device cuda `
   --output data/test_set/output/predictions.jsonl
 ```
 
-Nếu máy không có CUDA, đổi `--device cuda` thành `--device cpu`. Kết quả gồm:
+Output được tạo tại:
 
 ```text
 data/test_set/output/
@@ -170,22 +298,108 @@ data/test_set/output/
 └── prediction_errors.jsonl
 ```
 
-Mỗi dòng của `predictions.jsonl` có dạng:
+Mỗi dòng của `predictions.jsonl`:
 
 ```json
-{"note_id":"1","entities":[{"text":"...","type":"CHẨN_ĐOÁN","position":[10,20],"assertions":[],"candidates":["I10"]}]}
+{"note_id":"1","entities":[{"text":"tăng huyết áp","type":"CHẨN_ĐOÁN","position":[120,133],"assertions":[],"candidates":["I10"]}]}
 ```
 
-`note_id` lấy từ tên file (`1.txt` thành `"1"`). Offset trong output luôn được
-map về văn bản gốc. Nếu có file lỗi, chương trình vẫn ghi các sample thành công vào
-output, ghi chi tiết vào `prediction_errors.jsonl`, rồi trả exit code 1 để tránh bỏ
-sót lỗi khi chạy tự động.
+- `note_id` lấy từ tên file: `1.txt` → `"1"`.
+- `position` là `[start, end]`, exclusive-end, trên văn bản TXT gốc.
+- File được xử lý theo thứ tự `1.txt`, `2.txt`, ..., `100.txt`.
+- Sample lỗi được ghi riêng vào `prediction_errors.jsonl`.
+- Nếu có ít nhất một sample lỗi, CLI vẫn giữ prediction thành công nhưng trả exit
+  code `1` để pipeline triển khai không bỏ sót lỗi.
 
-## Test
+Kiểm tra nhanh số dòng output:
 
-```bash
-python -m unittest discover -s tests -v
+```powershell
+(Get-Content data/test_set/output/predictions.jsonl).Count
+Get-Content data/test_set/output/prediction_errors.jsonl
 ```
 
-Các model BGE/Qwen/GLiNER không được tải trong unit test; test dùng index local và
-mock model để đảm bảo pipeline chạy offline.
+Nếu không có lỗi, `predictions.jsonl` phải có 100 dòng và file error rỗng.
+
+## 9. Đánh giá baseline trên gold data
+
+```powershell
+uv run python -m src.main_pipeline `
+  --gold data/validated/validated_pass.jsonl `
+  --model models/medical-gliner
+```
+
+Lệnh trả metric exact-match và overlap-match theo entity type.
+
+## 10. Tạo lại synthetic data — không bắt buộc để inference
+
+Các file synthetic hiện đã có trong `data/generated`. Chỉ chạy phần này khi có
+raw seed/ontology và muốn sinh lại dữ liệu:
+
+```powershell
+uv run python build_synthetic_data.py survey
+uv run python build_synthetic_data.py build_pool
+uv run python build_synthetic_data.py generate 100
+```
+
+Generation và `validate_medical.py` có thể gọi dịch vụ bên ngoài tùy cấu hình
+`.env`; chúng không nằm trong inference self-hosted.
+
+## 11. Flow ngắn nhất từ clone đến output
+
+```powershell
+uv python install 3.12
+uv sync --python 3.12
+
+uv run hf download urchade/gliner_multi-v2.1 `
+  --local-dir models/gliner-base
+
+uv run python -m src.train_ner `
+  --contents data/generated/contents.jsonl `
+  --labels data/generated/labels.jsonl `
+  --model models/gliner-base `
+  --output models/medical-gliner `
+  --max-steps 2000 `
+  --batch-size 8 `
+  --device cuda `
+  --bf16
+
+uv run python -m src.run_inference `
+  --input data/test_set/input `
+  --model models/medical-gliner `
+  --device cuda `
+  --output data/test_set/output/predictions.jsonl
+```
+
+Trên máy CPU, thay `--device cuda` bằng `--device cpu`, bỏ `--bf16` và giảm
+`--batch-size` xuống `2`.
+
+## 12. Lỗi thường gặp
+
+### `Local GLiNER checkpoint not found`
+
+Chưa tải model hoặc truyền sai đường dẫn. Chạy lại bước tải model và kiểm tra
+`models/gliner-base` hoặc `models/medical-gliner`.
+
+### `No module named gliner`
+
+Command đang chạy ngoài environment của uv. Dùng `uv run ...` hoặc chạy lại:
+
+```powershell
+uv sync --python 3.12
+```
+
+### CUDA hết bộ nhớ
+
+Giảm batch size:
+
+```text
+--batch-size 8 → 4 → 2 → 1
+```
+
+### PowerShell hiển thị tiếng Việt bị lỗi
+
+File vẫn được Python đọc UTF-8. Có thể đổi console sang UTF-8:
+
+```powershell
+chcp 65001
+```

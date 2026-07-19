@@ -1271,7 +1271,7 @@ LLM_MODELS = {
         "api_key_env": "GROQ_API_KEY",
         "temperature": 0.7,
         "max_tokens": 1000,
-        "enabled": False,
+        "enabled": True,
     },
     "groq_gpt_oss": {  # giữ nguyên, đang chạy tốt
         "provider": "openai_compatible",
@@ -1298,7 +1298,7 @@ LLM_MODELS = {
         "api_key_env": "OPENROUTER_API_KEY",
         "temperature": 0.7,
         "max_tokens": 1000,
-        "enabled": False,
+        "enabled": True,
     },
     # =========================
     # OLLAMA LOCAL

@@ -269,7 +269,8 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/gliner-base `
   --device cpu `
-  --output data/test_set/baseline_output.zip
+  --output data/test_set/baseline_predictions.jsonl `
+  --zip-output data/test_set/baseline_output.zip
 ```
 
 ### Output cuối bằng model fine-tune
@@ -281,7 +282,8 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/medical-gliner `
   --device cpu `
-  --output data/test_set/output.zip
+  --output data/test_set/predictions.jsonl `
+  --zip-output data/test_set/output.zip
 ```
 
 NVIDIA GPU:
@@ -291,16 +293,22 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/medical-gliner `
   --device cuda `
-  --output data/test_set/output.zip
+  --output data/test_set/predictions.jsonl `
+  --zip-output data/test_set/output.zip
 ```
 
 Output được tạo tại:
 
 ```text
 data/test_set/
+├── predictions.jsonl
 ├── output.zip
 └── prediction_errors.jsonl
 ```
+
+`predictions.jsonl` là output trung gian, mỗi dòng chứa một bản ghi. Sau khi
+inference xong, pipeline đọc lại file này và tách từng dòng thành một file JSON
+riêng bên trong `output.zip`.
 
 Giải nén `output.zip` sẽ có đúng cấu trúc file nộp:
 
@@ -390,7 +398,8 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/medical-gliner `
   --device cuda `
-  --output data/test_set/output.zip
+  --output data/test_set/predictions.jsonl `
+  --zip-output data/test_set/output.zip
 ```
 
 Trên máy CPU, thay `--device cuda` bằng `--device cpu`, bỏ `--bf16` và giảm

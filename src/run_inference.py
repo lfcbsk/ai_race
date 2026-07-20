@@ -26,6 +26,7 @@ class InferenceSummary:
     succeeded: int
     failed: int
     output_path: str
+    zip_path: str
     error_path: str
 
 
@@ -72,6 +73,48 @@ def validate_test_set(input_dir: str | Path) -> dict[str, Any]:
     }
 
 
+def package_predictions(
+    predictions_path: str | Path,
+    zip_path: str | Path,
+) -> int:
+    """Convert prediction JSONL records into ``output/<note_id>.json`` ZIP."""
+    source = Path(predictions_path)
+    destination = Path(zip_path)
+    if source.resolve() == destination.resolve():
+        raise ValueError("Predictions JSONL path and ZIP path must be different.")
+
+    records: list[dict[str, Any]] = []
+    seen_note_ids: set[str] = set()
+    with source.open(encoding="utf-8") as prediction_file:
+        for line_number, line in enumerate(prediction_file, start=1):
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            note_id = str(record.get("note_id", ""))
+            if not note_id or "/" in note_id or "\\" in note_id:
+                raise ValueError(f"Invalid note_id at JSONL line {line_number}: {note_id!r}")
+            if note_id in seen_note_ids:
+                raise ValueError(f"Duplicate note_id in predictions JSONL: {note_id!r}")
+            seen_note_ids.add(note_id)
+            records.append(record)
+
+    records.sort(
+        key=lambda record: _file_sort_key(Path(f"{record['note_id']}.json"))
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    zip_tmp = destination.with_name(f"{destination.name}.tmp")
+    with zipfile.ZipFile(
+        zip_tmp, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
+        for record in records:
+            archive.writestr(
+                f"output/{record['note_id']}.json",
+                json.dumps(record, ensure_ascii=False, indent=2) + "\n",
+            )
+    zip_tmp.replace(destination)
+    return len(records)
+
+
 def run_test_set(
     input_dir: str | Path,
     output_path: str | Path,
@@ -79,20 +122,24 @@ def run_test_set(
     *,
     entity_linker: MedicalEntityLinker | None = None,
     error_path: str | Path | None = None,
+    zip_path: str | Path | None = None,
     threshold: float = 0.5,
     min_confidence: float = 0.3,
     include_text: bool = False,
 ) -> InferenceSummary:
-    """Run all test notes and create a competition-ready output ZIP.
+    """Run notes to JSONL, then create a competition-ready output ZIP.
 
-    Each ``<note_id>.txt`` is written as ``output/<note_id>.json`` in the
-    archive. For example, ``1.txt`` becomes ``output/1.json``.
+    The intermediate file contains one JSON record per line. It is then split
+    into ``output/<note_id>.json`` entries in the ZIP.
 
     A failure in one note is recorded separately and produces a valid empty
     prediction, so the archive always contains one JSON file per input TXT.
     """
     files = discover_test_files(input_dir)
     destination = Path(output_path)
+    zip_destination = (
+        Path(zip_path) if zip_path is not None else destination.with_name("output.zip")
+    )
     errors_destination = (
         Path(error_path)
         if error_path is not None
@@ -100,6 +147,11 @@ def run_test_set(
     )
     if destination.resolve() == errors_destination.resolve():
         raise ValueError("Output path and error path must be different.")
+    if zip_destination.resolve() in {
+        destination.resolve(),
+        errors_destination.resolve(),
+    }:
+        raise ValueError("JSONL, ZIP, and error paths must be different.")
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     errors_destination.parent.mkdir(parents=True, exist_ok=True)
@@ -114,9 +166,9 @@ def run_test_set(
 
     succeeded = 0
     failed = 0
-    with zipfile.ZipFile(
-        output_tmp, "w", compression=zipfile.ZIP_DEFLATED
-    ) as archive, errors_tmp.open(
+    with output_tmp.open(
+        "w", encoding="utf-8", newline="\n"
+    ) as output_file, errors_tmp.open(
         "w", encoding="utf-8", newline="\n"
     ) as error_file:
         for path in files:
@@ -143,18 +195,19 @@ def run_test_set(
                 }
                 error_file.write(json.dumps(error, ensure_ascii=False) + "\n")
                 failed += 1
-            archive.writestr(
-                f"output/{path.stem}.json",
-                json.dumps(record, ensure_ascii=False, indent=2) + "\n",
-            )
+            output_file.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     output_tmp.replace(destination)
     errors_tmp.replace(errors_destination)
+    packaged = package_predictions(destination, zip_destination)
+    if packaged != len(files):
+        raise RuntimeError(f"Packaged {packaged} JSON files for {len(files)} inputs.")
     return InferenceSummary(
         total=len(files),
         succeeded=succeeded,
         failed=failed,
         output_path=str(destination),
+        zip_path=str(zip_destination),
         error_path=str(errors_destination),
     )
 
@@ -164,8 +217,12 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--input", default="data/test_set/input")
     parser.add_argument(
         "--output",
-        default="data/test_set/output.zip",
-        help="Submission ZIP containing output/<note_id>.json files.",
+        default="data/test_set/predictions.jsonl",
+        help="Intermediate JSONL containing one prediction per line.",
+    )
+    parser.add_argument(
+        "--zip-output",
+        help="Submission ZIP path (default: output.zip next to --output).",
     )
     parser.add_argument(
         "--errors", default="data/test_set/prediction_errors.jsonl"
@@ -223,12 +280,21 @@ def _main() -> None:
         linker = None
     else:
         linker = build_default_medical_linker(icd_path=args.icd, drug_path=args.drug)
+    predictions_output = Path(args.output)
+    zip_output = Path(args.zip_output) if args.zip_output else None
+    if predictions_output.suffix.lower() == ".zip":
+        if zip_output is not None:
+            parser.error("Do not pass a ZIP path to both --output and --zip-output.")
+        zip_output = predictions_output
+        predictions_output = predictions_output.with_name("predictions.jsonl")
+
     summary = run_test_set(
         args.input,
-        args.output,
+        predictions_output,
         model,
         entity_linker=linker,
         error_path=args.errors,
+        zip_path=zip_output,
         threshold=args.threshold,
         min_confidence=args.min_confidence,
         include_text=args.include_text,

@@ -36,3 +36,5 @@ runs/
 
 # Generated competition predictions and per-file inference errors
 data/test_set/output/
+data/test_set/output.zip
+data/test_set/prediction_errors.jsonl

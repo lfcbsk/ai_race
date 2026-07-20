@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import zipfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -26,6 +27,16 @@ class InferenceSummary:
     failed: int
     output_path: str
     error_path: str
+
+
+class _UnavailableGLiNER:
+    """Model placeholder that lets the CLI still create a complete submission."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+
+    def predict_entities(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
+        raise RuntimeError(self.reason)
 
 
 def _file_sort_key(path: Path) -> tuple[int, int | str, str]:
@@ -188,20 +199,30 @@ def _main() -> None:
         return
 
     model_path = Path(args.model)
+    model_error: str | None = None
+    model: GLiNERModel
     if not args.allow_remote_model and not model_path.exists():
-        parser.error(
+        model_error = (
             f"Local GLiNER checkpoint not found: {model_path}. "
-            "Fine-tune/copy the model there, or explicitly use --allow-remote-model."
+            "Every output JSON will contain an empty entities list."
         )
+        model = _UnavailableGLiNER(model_error)
+    else:
+        try:
+            model = load_gliner_model(args.model, device=args.device)
+        except Exception as exc:
+            model_error = (
+                f"Could not load GLiNER model {args.model!r}: "
+                f"{type(exc).__name__}: {exc}. "
+                "Every output JSON will contain an empty entities list."
+            )
+            model = _UnavailableGLiNER(model_error)
 
-    try:
-        model = load_gliner_model(args.model, device=args.device)
-    except ModuleNotFoundError as exc:
-        if exc.name == "gliner":
-            parser.error("Package 'gliner' is not installed in this environment.")
-        raise
-
-    linker = build_default_medical_linker(icd_path=args.icd, drug_path=args.drug)
+    if model_error is not None:
+        print(f"WARNING: {model_error}", file=sys.stderr)
+        linker = None
+    else:
+        linker = build_default_medical_linker(icd_path=args.icd, drug_path=args.drug)
     summary = run_test_set(
         args.input,
         args.output,

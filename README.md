@@ -337,6 +337,12 @@ Get-Content data/test_set/prediction_errors.jsonl
 Nếu không có lỗi, ZIP phải có đủ `output/1.json` đến `output/100.json` và file
 error rỗng.
 
+Nếu checkpoint truyền vào `--model` chưa tồn tại hoặc không load được, CLI vẫn
+tạo đủ các file JSON với `entities: []` và ghi nguyên nhân vào
+`prediction_errors.jsonl`. Đây chỉ là output dự phòng để bảo đảm đúng cấu trúc;
+muốn có dự đoán thật cần đặt checkpoint tại `models/medical-gliner` hoặc dùng một
+model Hugging Face với `--allow-remote-model`.
+
 ## 9. Đánh giá baseline trên gold data
 
 ```powershell

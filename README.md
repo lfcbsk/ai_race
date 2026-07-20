@@ -322,6 +322,8 @@ Mỗi file JSON chứa nhãn của đúng một bản ghi. Ví dụ `output/1.js
 - `position` là `[start, end]`, exclusive-end, trên văn bản TXT gốc.
 - File được xử lý theo thứ tự `1.txt`, `2.txt`, ..., `100.txt`.
 - Sample lỗi được ghi riêng vào `prediction_errors.jsonl`.
+- Kể cả khi một sample inference lỗi, ZIP vẫn có file JSON tương ứng với
+  `entities: []`, vì vậy 100 file TXT luôn tạo ra đủ 100 file JSON.
 - Nếu có ít nhất một sample lỗi, CLI vẫn giữ prediction thành công nhưng trả exit
   code `1` để pipeline triển khai không bỏ sót lỗi.
 

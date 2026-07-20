@@ -77,8 +77,8 @@ def run_test_set(
     Each ``<note_id>.txt`` is written as ``output/<note_id>.json`` in the
     archive. For example, ``1.txt`` becomes ``output/1.json``.
 
-    A failure in one note is recorded separately and does not discard successful
-    predictions from the remaining notes.
+    A failure in one note is recorded separately and produces a valid empty
+    prediction, so the archive always contains one JSON file per input TXT.
     """
     files = discover_test_files(input_dir)
     destination = Path(output_path)
@@ -109,16 +109,18 @@ def run_test_set(
         "w", encoding="utf-8", newline="\n"
     ) as error_file:
         for path in files:
+            record: dict[str, Any] = {
+                "note_id": path.stem,
+                "entities": [],
+            }
             try:
                 document = load_documents(path, document_id=path.stem)[0]
+                if include_text:
+                    record["text"] = document.raw_text
                 result = pipeline.process(document)
                 record = result.competition_output(
                     strict=True,
                     include_text=include_text,
-                )
-                archive.writestr(
-                    f"output/{path.stem}.json",
-                    json.dumps(record, ensure_ascii=False, indent=2) + "\n",
                 )
                 succeeded += 1
             except Exception as exc:  # keep other test notes runnable
@@ -130,6 +132,10 @@ def run_test_set(
                 }
                 error_file.write(json.dumps(error, ensure_ascii=False) + "\n")
                 failed += 1
+            archive.writestr(
+                f"output/{path.stem}.json",
+                json.dumps(record, ensure_ascii=False, indent=2) + "\n",
+            )
 
     output_tmp.replace(destination)
     errors_tmp.replace(errors_destination)

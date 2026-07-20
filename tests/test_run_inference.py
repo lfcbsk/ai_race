@@ -15,6 +15,11 @@ class EmptyGLiNER:
         return []
 
 
+class FailingGLiNER:
+    def predict_entities(self, text, labels, **kwargs):
+        raise RuntimeError("model failed")
+
+
 class RunInferenceTests(unittest.TestCase):
     def test_validate_and_write_predictions_in_numeric_order(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -53,6 +58,36 @@ class RunInferenceTests(unittest.TestCase):
             self.assertEqual(summary.succeeded, 3)
             self.assertEqual(summary.failed, 0)
             self.assertTrue(Path(summary.error_path).is_file())
+
+    def test_write_one_json_per_input_even_when_inference_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            input_dir = root / "input"
+            input_dir.mkdir()
+            for note_id in range(1, 101):
+                (input_dir / f"{note_id}.txt").write_text(
+                    f"Medical note {note_id}", encoding="utf-8"
+                )
+
+            output_path = root / "output.zip"
+            summary = run_test_set(
+                input_dir,
+                output_path,
+                FailingGLiNER(),
+                entity_linker=MedicalEntityLinker(),
+            )
+
+            with zipfile.ZipFile(output_path) as archive:
+                self.assertEqual(len(archive.namelist()), 100)
+                self.assertEqual(archive.namelist()[0], "output/1.json")
+                self.assertEqual(archive.namelist()[-1], "output/100.json")
+                for note_id in range(1, 101):
+                    record = json.loads(archive.read(f"output/{note_id}.json"))
+                    self.assertEqual(record, {"note_id": str(note_id), "entities": []})
+
+            self.assertEqual(summary.total, 100)
+            self.assertEqual(summary.succeeded, 0)
+            self.assertEqual(summary.failed, 100)
 
 
 if __name__ == "__main__":

@@ -269,9 +269,16 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/gliner-base `
   --device cpu `
+  --chunk-size 300 `
+  --chunk-overlap 50 `
   --output data/test_set/baseline_predictions.jsonl `
   --zip-output data/test_set/baseline_output.zip
 ```
+
+GLiNER giới hạn chiều dài mỗi lần inference, nên pipeline mặc định chia văn bản
+thành chunk 300 từ với 50 từ overlap. Prediction của từng chunk được cộng lại
+offset toàn văn bản; entity trùng trong vùng overlap được deduplicate trước khi
+ghi output. Có thể điều chỉnh bằng `--chunk-size` và `--chunk-overlap`.
 
 ### Output cuối bằng model fine-tune
 

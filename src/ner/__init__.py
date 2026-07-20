@@ -7,6 +7,8 @@ from .datasets import (
     convert_document_to_ner_sample,
 )
 from .inference import (
+    DEFAULT_CHUNK_OVERLAP,
+    DEFAULT_CHUNK_SIZE,
     DEFAULT_LABELS,
     DEFAULT_MODEL_NAME,
     GLiNERModel,
@@ -14,6 +16,7 @@ from .inference import (
     load_gliner_model,
     predict_document,
     predict_documents,
+    iter_text_chunks,
 )
 from .metrics import NERMetricsReport, TypeMetrics, evaluate_ner, score_document
 from .postprocess import (
@@ -43,6 +46,8 @@ __all__ = [
     "build_gliner_dataset",
     "convert_document_to_ner_sample",
     "DEFAULT_LABELS",
+    "DEFAULT_CHUNK_SIZE",
+    "DEFAULT_CHUNK_OVERLAP",
     "DEFAULT_MODEL_NAME",
     "GLiNERModel",
     "NERMetricsReport",
@@ -56,6 +61,7 @@ __all__ = [
     "postprocess_predictions",
     "predict_document",
     "predict_documents",
+    "iter_text_chunks",
     "resolve_overlaps",
     "score_document",
     "NERTrainerConfig",

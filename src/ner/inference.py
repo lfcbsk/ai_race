@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Iterable, Protocol
 
@@ -18,6 +19,8 @@ DEFAULT_LABELS: list[str] = [
 # (chưa có checkpoint GLiNER riêng cho tiếng Việt). Sau này thay bằng checkpoint
 # fine-tuned mà không cần đổi API của module này.
 DEFAULT_MODEL_NAME = "urchade/gliner_multi-v2.1"
+DEFAULT_CHUNK_SIZE = 300
+DEFAULT_CHUNK_OVERLAP = 50
 
 
 class GLiNERModel(Protocol):
@@ -85,6 +88,33 @@ class RawEntityPrediction:
         }
 
 
+def iter_text_chunks(
+    text: str,
+    *,
+    chunk_size: int = DEFAULT_CHUNK_SIZE,
+    chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
+) -> list[tuple[int, int]]:
+    """Return overlapping word-based ``[start, end)`` character spans."""
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be greater than zero.")
+    if not 0 <= chunk_overlap < chunk_size:
+        raise ValueError("chunk_overlap must satisfy 0 <= overlap < chunk_size.")
+
+    words = list(re.finditer(r"\S+", text))
+    if not words:
+        return []
+
+    chunks: list[tuple[int, int]] = []
+    start_word = 0
+    while start_word < len(words):
+        end_word = min(start_word + chunk_size, len(words))
+        chunks.append((words[start_word].start(), words[end_word - 1].end()))
+        if end_word == len(words):
+            break
+        start_word = end_word - chunk_overlap
+    return chunks
+
+
 def predict_document(
     document: MedicalDocument,
     model: GLiNERModel,
@@ -94,6 +124,8 @@ def predict_document(
     flat_ner: bool = True,
     multi_label: bool = False,
     normalize_kwargs: dict[str, Any] | None = None,
+    chunk_size: int = DEFAULT_CHUNK_SIZE,
+    chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> tuple[NormalizedDocument, list[RawEntityPrediction]]:
     """Chạy NER trên một ``MedicalDocument`` bằng model GLiNER đã load.
 
@@ -112,33 +144,43 @@ def predict_document(
     if not normalized.normalized_text.strip():
         return normalized, []
 
-    raw_predictions = model.predict_entities(
-        normalized.normalized_text,
-        labels,
-        flat_ner=flat_ner,
-        threshold=threshold,
-        multi_label=multi_label,
-    )
-
     predictions: list[RawEntityPrediction] = []
     text_length = len(normalized.normalized_text)
-    for raw in raw_predictions:
-        start = int(raw["start"])
-        end = int(raw["end"])
-        if not 0 <= start < end <= text_length:
-            # Phòng thủ: bỏ qua span dị dạng model trả về, không để crash cả batch.
-            continue
-
-        predictions.append(
-            RawEntityPrediction(
-                document_id=document.document_id,
-                text=raw.get("text", normalized.normalized_text[start:end]),
-                entity_type=str(raw["label"]),
-                normalized_start=start,
-                normalized_end=end,
-                confidence=float(raw["score"]),
-            )
+    chunks = iter_text_chunks(
+        normalized.normalized_text,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    )
+    for chunk_start, chunk_end in chunks:
+        chunk_text = normalized.normalized_text[chunk_start:chunk_end]
+        raw_predictions = model.predict_entities(
+            chunk_text,
+            labels,
+            flat_ner=flat_ner,
+            threshold=threshold,
+            multi_label=multi_label,
         )
+        for raw in raw_predictions:
+            local_start = int(raw["start"])
+            local_end = int(raw["end"])
+            if not 0 <= local_start < local_end <= len(chunk_text):
+                # Bỏ span dị dạng, không để crash cả document.
+                continue
+            start = chunk_start + local_start
+            end = chunk_start + local_end
+            if end > text_length:
+                continue
+
+            predictions.append(
+                RawEntityPrediction(
+                    document_id=document.document_id,
+                    text=raw.get("text", normalized.normalized_text[start:end]),
+                    entity_type=str(raw["label"]),
+                    normalized_start=start,
+                    normalized_end=end,
+                    confidence=float(raw["score"]),
+                )
+            )
 
     return normalized, predictions
 
@@ -152,6 +194,8 @@ def predict_documents(
     flat_ner: bool = True,
     multi_label: bool = False,
     normalize_kwargs: dict[str, Any] | None = None,
+    chunk_size: int = DEFAULT_CHUNK_SIZE,
+    chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> dict[str, tuple[NormalizedDocument, list[RawEntityPrediction]]]:
     """Chạy ``predict_document`` cho nhiều document, map theo ``document_id``.
 
@@ -169,6 +213,8 @@ def predict_documents(
             flat_ner=flat_ner,
             multi_label=multi_label,
             normalize_kwargs=normalize_kwargs,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
         )
         for document in documents
     }

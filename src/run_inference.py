@@ -16,7 +16,12 @@ from typing import Any
 
 from src.clinical_pipeline import ClinicalNLPPipeline, build_default_medical_linker
 from src.linking import MedicalEntityLinker
-from src.ner import GLiNERModel, load_gliner_model
+from src.ner import (
+    DEFAULT_CHUNK_OVERLAP,
+    DEFAULT_CHUNK_SIZE,
+    GLiNERModel,
+    load_gliner_model,
+)
 from src.preprocessing import load_documents
 
 
@@ -126,6 +131,8 @@ def run_test_set(
     threshold: float = 0.5,
     min_confidence: float = 0.3,
     include_text: bool = False,
+    chunk_size: int = DEFAULT_CHUNK_SIZE,
+    chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> InferenceSummary:
     """Run notes to JSONL, then create a competition-ready output ZIP.
 
@@ -162,6 +169,8 @@ def run_test_set(
         entity_linker=entity_linker,
         ner_threshold=threshold,
         min_ner_confidence=min_confidence,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
     )
 
     succeeded = 0
@@ -231,6 +240,18 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--device", default="cpu", choices=("cpu", "cuda", "mps"))
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--min-confidence", type=float, default=0.3)
+    parser.add_argument(
+        "--chunk-size",
+        type=int,
+        default=DEFAULT_CHUNK_SIZE,
+        help="Maximum whitespace-delimited words per GLiNER call.",
+    )
+    parser.add_argument(
+        "--chunk-overlap",
+        type=int,
+        default=DEFAULT_CHUNK_OVERLAP,
+        help="Overlapping words between consecutive chunks.",
+    )
     parser.add_argument("--icd", default="data/icd_mapping_final.json")
     parser.add_argument("--drug", default="data/drug_mapping_final.json")
     parser.add_argument("--include-text", action="store_true")
@@ -298,6 +319,8 @@ def _main() -> None:
         threshold=args.threshold,
         min_confidence=args.min_confidence,
         include_text=args.include_text,
+        chunk_size=args.chunk_size,
+        chunk_overlap=args.chunk_overlap,
     )
     print(json.dumps(asdict(summary), ensure_ascii=False, indent=2))
     if summary.failed:

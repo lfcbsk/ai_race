@@ -13,6 +13,8 @@ from src.linking import (
     load_rxnorm_entries,
 )
 from src.ner import (
+    DEFAULT_CHUNK_OVERLAP,
+    DEFAULT_CHUNK_SIZE,
     DEFAULT_LABELS,
     GLiNERModel,
     RawEntityPrediction,
@@ -61,6 +63,8 @@ class ClinicalNLPPipeline:
         ner_threshold: float = 0.5,
         min_ner_confidence: float = 0.3,
         normalize_kwargs: dict[str, Any] | None = None,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+        chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
     ) -> None:
         self.ner_model = ner_model
         self.assertion_detector = assertion_detector or AssertionDetector()
@@ -69,6 +73,8 @@ class ClinicalNLPPipeline:
         self.ner_threshold = ner_threshold
         self.min_ner_confidence = min_ner_confidence
         self.normalize_kwargs = dict(normalize_kwargs or {})
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
 
     def process(self, document: MedicalDocument) -> ClinicalPipelineResult:
         normalized, raw_predictions = predict_document(
@@ -77,6 +83,8 @@ class ClinicalNLPPipeline:
             labels=self.labels,
             threshold=self.ner_threshold,
             normalize_kwargs=self.normalize_kwargs,
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
         )
         entities = postprocess_predictions(
             raw_predictions,

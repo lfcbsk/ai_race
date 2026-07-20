@@ -25,17 +25,20 @@ class NERTrainerConfig:
     output_dir: str = "models/medical-gliner"
     validation_ratio: float = 0.1
     seed: int = 42
-    max_steps: int = 2_000
-    train_batch_size: int = 8
-    eval_batch_size: int = 8
-    learning_rate: float = 1e-5
-    others_learning_rate: float = 5e-5
+    max_steps: int = 500
+    train_batch_size: int = 1
+    eval_batch_size: int = 1
+    gradient_accumulation_steps: int = 8
+    learning_rate: float = 5e-6
+    others_learning_rate: float = 1e-5
     weight_decay: float = 0.01
+    warmup_steps: int = 50
     warmup_ratio: float = 0.1
-    save_steps: int = 200
-    logging_steps: int = 20
+    save_steps: int = 100
+    logging_steps: int = 10
     save_total_limit: int = 2
     device: str = "cpu"
+    fp16: bool = True
     bf16: bool = False
     allow_remote_model: bool = False
     max_parameters: int = 9_000_000_000
@@ -266,18 +269,30 @@ def fine_tune_gliner(
         train_dataset=train_data,
         eval_dataset=eval_data or None,
         output_dir=str(output_dir),
+
         max_steps=config.max_steps,
+
         per_device_train_batch_size=config.train_batch_size,
         per_device_eval_batch_size=config.eval_batch_size,
+        gradient_accumulation_steps=config.gradient_accumulation_steps,
+
         learning_rate=config.learning_rate,
         others_lr=config.others_learning_rate,
+
         weight_decay=config.weight_decay,
         others_weight_decay=config.weight_decay,
-        warmup_ratio=config.warmup_ratio,
+
+        warmup_steps=config.warmup_steps,
+
         save_steps=config.save_steps,
         logging_steps=config.logging_steps,
         save_total_limit=config.save_total_limit,
+
+        fp16=config.fp16,
         bf16=config.bf16,
+
+        gradient_checkpointing=True,
+        auto_find_batch_size=False,
     )
     if hasattr(trainer, "save_model"):
         trainer.save_model()

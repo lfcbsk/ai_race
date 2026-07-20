@@ -6,6 +6,7 @@ from .datasets import (
     build_gliner_dataset,
     convert_document_to_ner_sample,
 )
+from .drug_rules import DrugRuleDetector
 from .inference import (
     DEFAULT_CHUNK_OVERLAP,
     DEFAULT_CHUNK_SIZE,
@@ -41,6 +42,7 @@ from .trainer import (
 __all__ = [
     "DatasetBuildResult",
     "DatasetError",
+    "DrugRuleDetector",
     "GLiNERSample",
     "NERDatasetError",
     "build_gliner_dataset",

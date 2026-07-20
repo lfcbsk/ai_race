@@ -16,6 +16,7 @@ from src.ner import (
     DEFAULT_CHUNK_OVERLAP,
     DEFAULT_CHUNK_SIZE,
     DEFAULT_LABELS,
+    DrugRuleDetector,
     GLiNERModel,
     RawEntityPrediction,
     postprocess_predictions,
@@ -65,6 +66,7 @@ class ClinicalNLPPipeline:
         normalize_kwargs: dict[str, Any] | None = None,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
         chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
+        drug_rule_detector: DrugRuleDetector | None = None,
     ) -> None:
         self.ner_model = ner_model
         self.assertion_detector = assertion_detector or AssertionDetector()
@@ -75,6 +77,7 @@ class ClinicalNLPPipeline:
         self.normalize_kwargs = dict(normalize_kwargs or {})
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
+        self.drug_rule_detector = drug_rule_detector
 
     def process(self, document: MedicalDocument) -> ClinicalPipelineResult:
         normalized, raw_predictions = predict_document(
@@ -86,6 +89,13 @@ class ClinicalNLPPipeline:
             chunk_size=self.chunk_size,
             chunk_overlap=self.chunk_overlap,
         )
+        if self.drug_rule_detector is not None:
+            raw_predictions.extend(
+                self.drug_rule_detector.find_predictions(
+                    normalized,
+                    document.document_id,
+                )
+            )
         entities = postprocess_predictions(
             raw_predictions,
             normalized,

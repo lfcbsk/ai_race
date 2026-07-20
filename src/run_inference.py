@@ -15,10 +15,11 @@ from pathlib import Path
 from typing import Any
 
 from src.clinical_pipeline import ClinicalNLPPipeline, build_default_medical_linker
-from src.linking import MedicalEntityLinker
+from src.linking import MedicalEntityLinker, load_rxnorm_entries
 from src.ner import (
     DEFAULT_CHUNK_OVERLAP,
     DEFAULT_CHUNK_SIZE,
+    DrugRuleDetector,
     GLiNERModel,
     load_gliner_model,
 )
@@ -133,6 +134,7 @@ def run_test_set(
     include_text: bool = False,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
+    drug_rule_detector: DrugRuleDetector | None = None,
 ) -> InferenceSummary:
     """Run notes to JSONL, then create a competition-ready output ZIP.
 
@@ -171,6 +173,7 @@ def run_test_set(
         min_ner_confidence=min_confidence,
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
+        drug_rule_detector=drug_rule_detector,
     )
 
     succeeded = 0
@@ -254,6 +257,11 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--icd", default="data/icd_mapping_final.json")
     parser.add_argument("--drug", default="data/drug_mapping_final.json")
+    parser.add_argument(
+        "--disable-drug-rules",
+        action="store_true",
+        help="Disable ontology/context-based drug recall rules.",
+    )
     parser.add_argument("--include-text", action="store_true")
     parser.add_argument(
         "--allow-remote-model",
@@ -299,8 +307,14 @@ def _main() -> None:
     if model_error is not None:
         print(f"WARNING: {model_error}", file=sys.stderr)
         linker = None
+        drug_rule_detector = None
     else:
         linker = build_default_medical_linker(icd_path=args.icd, drug_path=args.drug)
+        drug_rule_detector = (
+            None
+            if args.disable_drug_rules
+            else DrugRuleDetector.from_entries(load_rxnorm_entries(args.drug))
+        )
     predictions_output = Path(args.output)
     zip_output = Path(args.zip_output) if args.zip_output else None
     if predictions_output.suffix.lower() == ".zip":
@@ -321,6 +335,7 @@ def _main() -> None:
         include_text=args.include_text,
         chunk_size=args.chunk_size,
         chunk_overlap=args.chunk_overlap,
+        drug_rule_detector=drug_rule_detector,
     )
     print(json.dumps(asdict(summary), ensure_ascii=False, indent=2))
     if summary.failed:

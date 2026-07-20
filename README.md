@@ -11,7 +11,7 @@ TXT test set
   → assertion: isNegated / isHistorical / isFamily
   → ICD-10 và RxNorm linking
   → validate schema
-  → predictions.jsonl
+  → output.zip (output/1.json, ..., output/100.json)
 ```
 
 Inference mặc định không gọi API. GLiNER chạy từ checkpoint local; assertion dùng
@@ -269,7 +269,7 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/gliner-base `
   --device cpu `
-  --output data/test_set/output/baseline_predictions.jsonl
+  --output data/test_set/baseline_output.zip
 ```
 
 ### Output cuối bằng model fine-tune
@@ -281,7 +281,7 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/medical-gliner `
   --device cpu `
-  --output data/test_set/output/predictions.jsonl
+  --output data/test_set/output.zip
 ```
 
 NVIDIA GPU:
@@ -291,38 +291,49 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/medical-gliner `
   --device cuda `
-  --output data/test_set/output/predictions.jsonl
+  --output data/test_set/output.zip
 ```
 
 Output được tạo tại:
 
 ```text
-data/test_set/output/
-├── predictions.jsonl
+data/test_set/
+├── output.zip
 └── prediction_errors.jsonl
 ```
 
-Mỗi dòng của `predictions.jsonl`:
+Giải nén `output.zip` sẽ có đúng cấu trúc file nộp:
+
+```text
+output/
+├── 1.json
+├── 2.json
+├── ...
+└── 100.json
+```
+
+Mỗi file JSON chứa nhãn của đúng một bản ghi. Ví dụ `output/1.json`:
 
 ```json
 {"note_id":"1","entities":[{"text":"tăng huyết áp","type":"CHẨN_ĐOÁN","position":[120,133],"assertions":[],"candidates":["I10"]}]}
 ```
 
-- `note_id` lấy từ tên file: `1.txt` → `"1"`.
+- Tên output lấy từ tên input: `1.txt` → `output/1.json`.
 - `position` là `[start, end]`, exclusive-end, trên văn bản TXT gốc.
 - File được xử lý theo thứ tự `1.txt`, `2.txt`, ..., `100.txt`.
 - Sample lỗi được ghi riêng vào `prediction_errors.jsonl`.
 - Nếu có ít nhất một sample lỗi, CLI vẫn giữ prediction thành công nhưng trả exit
   code `1` để pipeline triển khai không bỏ sót lỗi.
 
-Kiểm tra nhanh số dòng output:
+Kiểm tra nhanh nội dung ZIP:
 
 ```powershell
-(Get-Content data/test_set/output/predictions.jsonl).Count
-Get-Content data/test_set/output/prediction_errors.jsonl
+tar -tf data/test_set/output.zip
+Get-Content data/test_set/prediction_errors.jsonl
 ```
 
-Nếu không có lỗi, `predictions.jsonl` phải có 100 dòng và file error rỗng.
+Nếu không có lỗi, ZIP phải có đủ `output/1.json` đến `output/100.json` và file
+error rỗng.
 
 ## 9. Đánh giá baseline trên gold data
 
@@ -371,7 +382,7 @@ uv run python -m src.run_inference `
   --input data/test_set/input `
   --model models/medical-gliner `
   --device cuda `
-  --output data/test_set/output/predictions.jsonl
+  --output data/test_set/output.zip
 ```
 
 Trên máy CPU, thay `--device cuda` bằng `--device cpu`, bỏ `--bf16` và giảm

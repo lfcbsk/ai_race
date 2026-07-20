@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 from src.linking import MedicalEntityLinker
@@ -30,7 +31,7 @@ class RunInferenceTests(unittest.TestCase):
             self.assertEqual(validation["first_note_id"], "1")
             self.assertEqual(validation["last_note_id"], "10")
 
-            output_path = root / "output" / "predictions.jsonl"
+            output_path = root / "output.zip"
             summary = run_test_set(
                 input_dir,
                 output_path,
@@ -38,10 +39,15 @@ class RunInferenceTests(unittest.TestCase):
                 entity_linker=MedicalEntityLinker(),
             )
 
-            records = [
-                json.loads(line)
-                for line in output_path.read_text(encoding="utf-8").splitlines()
-            ]
+            with zipfile.ZipFile(output_path) as archive:
+                self.assertEqual(
+                    archive.namelist(),
+                    ["output/1.json", "output/2.json", "output/10.json"],
+                )
+                records = [
+                    json.loads(archive.read(name).decode("utf-8"))
+                    for name in archive.namelist()
+                ]
             self.assertEqual([record["note_id"] for record in records], ["1", "2", "10"])
             self.assertTrue(all(record["entities"] == [] for record in records))
             self.assertEqual(summary.succeeded, 3)

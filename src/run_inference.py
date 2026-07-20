@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import zipfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -71,7 +72,10 @@ def run_test_set(
     min_confidence: float = 0.3,
     include_text: bool = False,
 ) -> InferenceSummary:
-    """Run all test notes and write one competition record per JSONL line.
+    """Run all test notes and create a competition-ready output ZIP.
+
+    Each ``<note_id>.txt`` is written as ``output/<note_id>.json`` in the
+    archive. For example, ``1.txt`` becomes ``output/1.json``.
 
     A failure in one note is recorded separately and does not discard successful
     predictions from the remaining notes.
@@ -81,7 +85,7 @@ def run_test_set(
     errors_destination = (
         Path(error_path)
         if error_path is not None
-        else destination.with_name(f"{destination.stem}.errors.jsonl")
+        else destination.with_name("prediction_errors.jsonl")
     )
     if destination.resolve() == errors_destination.resolve():
         raise ValueError("Output path and error path must be different.")
@@ -99,8 +103,11 @@ def run_test_set(
 
     succeeded = 0
     failed = 0
-    with output_tmp.open("w", encoding="utf-8", newline="\n") as output_file, \
-            errors_tmp.open("w", encoding="utf-8", newline="\n") as error_file:
+    with zipfile.ZipFile(
+        output_tmp, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive, errors_tmp.open(
+        "w", encoding="utf-8", newline="\n"
+    ) as error_file:
         for path in files:
             try:
                 document = load_documents(path, document_id=path.stem)[0]
@@ -109,7 +116,10 @@ def run_test_set(
                     strict=True,
                     include_text=include_text,
                 )
-                output_file.write(json.dumps(record, ensure_ascii=False) + "\n")
+                archive.writestr(
+                    f"output/{path.stem}.json",
+                    json.dumps(record, ensure_ascii=False, indent=2) + "\n",
+                )
                 succeeded += 1
             except Exception as exc:  # keep other test notes runnable
                 error = {
@@ -136,10 +146,12 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", default="data/test_set/input")
     parser.add_argument(
-        "--output", default="data/test_set/output/predictions.jsonl"
+        "--output",
+        default="data/test_set/output.zip",
+        help="Submission ZIP containing output/<note_id>.json files.",
     )
     parser.add_argument(
-        "--errors", default="data/test_set/output/prediction_errors.jsonl"
+        "--errors", default="data/test_set/prediction_errors.jsonl"
     )
     parser.add_argument("--model", default="models/medical-gliner")
     parser.add_argument("--device", default="cpu", choices=("cpu", "cuda", "mps"))

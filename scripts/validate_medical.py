@@ -1,747 +1,956 @@
-"""
-=====================================================================
-VALIDATION GATE — dùng model y khoa riêng để double-check synthetic
-note sau khi build_synthetic_data.py generate đã chạy xong.
-
-Đọc data/generated/contents.jsonl + labels.jsonl, gửi từng note cho
-1 model chấm y khoa qua API OpenAI-compatible để kiểm tra:
-    1. Tính hợp lý lâm sàng (triệu chứng/chẩn đoán/thuốc có phi lý không)
-    2. Assertion (isHistorical/isNegated/isFamily) có đúng nghĩa thật không
-    3. Không có claim y khoa bị bịa thêm ngoài constraint
-
-CHẠY:
-    python validate_medical.py run          # chạy full validation
-    python validate_medical.py run --limit 50   # test thử 50 note đầu
-
-OUTPUT:
-    data/validated/validated_pass.jsonl      # note pass, dùng để train
-    data/validated/validated_flagged.jsonl   # note bị flag kèm lý do
-    data/validated/validation_errors.jsonl   # lỗi API/kỹ thuật, không kết luận note sai
-    data/validated/validation_report.json    # thống kê tổng
-=====================================================================
-"""
+from __future__ import annotations
 
 import argparse
 import json
 import os
-import re
+import random
 import time
-from pathlib import Path
+from datetime import datetime
 from typing import Any
 
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
-
-WORK = Path("data")
-GENERATED_DIR = WORK / "generated"
-VALIDATED_DIR = WORK / "validated"
-VALIDATED_DIR.mkdir(exist_ok=True, parents=True)
-
-
-# =====================================================================
-# 1. CẤU HÌNH MODEL Y KHOA
-# =====================================================================
-# Mặc định dùng Groq. Có thể đổi provider/model qua .env miễn là API hỗ trợ
-# endpoint OpenAI-compatible /chat/completions.
-
-MEDICAL_MODEL_CONFIG = {
-    "provider": "openai_compatible",
-    "model": os.getenv(
-        "VALIDATOR_MODEL",
-        "openai/gpt-oss-120b",
-    ),
-    "base_url": os.getenv(
-        "VALIDATOR_BASE_URL",
-        "https://api.groq.com/openai/v1",
-    ),
-    "api_key_env": "VALIDATOR_API_KEY",
-    "temperature": 0.0,
-    "max_tokens": 500,
-    "timeout": 60,
-}
-
-ALLOWED_ENTITY_TYPES = {
-    "CHẨN_ĐOÁN",
-    "TRIỆU_CHỨNG",
-    "THUỐC",
-    "TÊN_XÉT_NGHIỆM",
-    "KẾT_QUẢ_XÉT_NGHIỆM",
-}
-
-ALLOWED_ASSERTIONS = {
-    "isHistorical",
-    "isNegated",
-    "isFamily",
-}
-
-BAD_OUTPUT_PATTERNS = [
-    r"```",
-    r"^\s*dưới đây là",
-    r"^\s*đoạn bệnh án",
-    r"^\s*theo yêu cầu",
-    r"^\s*nội dung bắt buộc",
-    r"^\s*constraint",
-]
+from scripts.synthetic.common import (
+    BlockSpec,
+    CATALOG_DIR,
+    CaseSpec,
+    EntitySpec,
+    GENERATED_DIR,
+    NegativeSpec,
+    SectionSpec,
+    append_jsonl,
+    ensure_directories,
+    read_json,
+    read_jsonl,
+    validate_case_spec,
+    validate_markers,
+)
 
 
-def rule_based_validate(
-    note_text: str,
-    entities: list[dict[str, Any]],
-) -> dict[str, Any]:
-    hard_errors: list[str] = []
-    warnings: list[str] = []
+QWEN_SYSTEM_PROMPT = """
+Bạn là bộ dựng văn bản cho dữ liệu NLP y khoa tổng hợp.
 
-    if not isinstance(note_text, str):
-        return {
-            "passed": False,
-            "hard_errors": ["Text không phải chuỗi"],
-            "warnings": [],
-        }
+Đầu vào là SECTION_SPEC chứa:
+- target entity có marker [[E...]]...[[/E...]];
+- hard-negative phrase có marker [[N...]]...[[/N...]];
+- scenario lâm sàng;
+- kiểu trình bày của section.
 
-    note_text = note_text.strip()
+Bạn chỉ được viết ngữ cảnh lâm sàng xung quanh các chuỗi
+đã được cung cấp.
 
-    if not note_text:
-        return {
-            "passed": False,
-            "hard_errors": ["Văn bản rỗng"],
-            "warnings": [],
-        }
+QUY TẮC TUYỆT ĐỐI:
 
-    if len(note_text) < 30:
-        warnings.append("Văn bản rất ngắn")
-
-    if not entities:
-        hard_errors.append("Không có entity")
-
-    for pattern in BAD_OUTPUT_PATTERNS:
-        if re.search(pattern, note_text, re.I):
-            hard_errors.append(
-                f"Output chứa dấu hiệu model giải thích hoặc copy prompt: {pattern}"
-            )
-
-    seen_entities: set[tuple] = set()
-    occupied: list[tuple[int, int, str]] = []
-
-    for index, entity in enumerate(entities):
-        prefix = f"Entity #{index}"
-
-        entity_type = entity.get("type")
-        entity_text = entity.get("text")
-        position = entity.get("position")
-
-        if entity_type not in ALLOWED_ENTITY_TYPES:
-            hard_errors.append(
-                f"{prefix}: type không hợp lệ: {entity_type}"
-            )
-
-        if not isinstance(entity_text, str) or not entity_text:
-            hard_errors.append(
-                f"{prefix}: text entity rỗng"
-            )
-
-        if (
-            not isinstance(position, list)
-            or len(position) != 2
-            or not all(isinstance(value, int) for value in position)
-        ):
-            hard_errors.append(
-                f"{prefix}: position phải là [start, end] integer"
-            )
-            continue
-
-        start, end = position
-
-        if start < 0 or end <= start or end > len(note_text):
-            hard_errors.append(
-                f"{prefix}: span [{start}, {end}] không hợp lệ"
-            )
-            continue
-
-        actual_text = note_text[start:end]
-
-        if actual_text != entity_text:
-            hard_errors.append(
-                f"{prefix}: span mismatch, "
-                f"label='{entity_text}', actual='{actual_text}'"
-            )
-
-        entity_key = (
-            entity_type,
-            start,
-            end,
-            entity_text,
-        )
-
-        if entity_key in seen_entities:
-            hard_errors.append(
-                f"{prefix}: entity bị trùng hoàn toàn"
-            )
-        else:
-            seen_entities.add(entity_key)
-
-        for old_start, old_end, old_type in occupied:
-            is_overlap = (
-                start < old_end
-                and end > old_start
-            )
-
-            if is_overlap:
-                warnings.append(
-                    f"{prefix}: overlap với {old_type} "
-                    f"[{old_start}, {old_end}]"
-                )
-
-        occupied.append(
-            (start, end, entity_type)
-        )
-
-        assertions = entity.get("assertions", [])
-        if not isinstance(assertions, list):
-            hard_errors.append(
-                f"{prefix}: assertions phải là list"
-            )
-        else:
-            unknown_assertions = set(assertions) - ALLOWED_ASSERTIONS
-            if unknown_assertions:
-                hard_errors.append(
-                    f"{prefix}: assertion không hợp lệ: "
-                    f"{sorted(unknown_assertions)}"
-                )
-            if len(assertions) != len(set(assertions)):
-                hard_errors.append(
-                    f"{prefix}: assertion bị trùng"
-                )
-
-        if entity_type in {"CHẨN_ĐOÁN", "THUỐC"}:
-            candidates = entity.get("candidates")
-            if not isinstance(candidates, list) or not candidates:
-                hard_errors.append(
-                    f"{prefix}: thiếu candidates chuẩn hóa"
-                )
-
-    return {
-        "passed": len(hard_errors) == 0,
-        "hard_errors": hard_errors,
-        "warnings": warnings,
-    }
-
-VALIDATION_SYSTEM_PROMPT = """
-Bạn là hệ thống kiểm tra dữ liệu bệnh án tổng hợp dùng để huấn luyện
-mô hình NLP y tế.
-
-Các kiểm tra cấu trúc, span và mã ontology đã được thực hiện bằng
-rule-based validator. Bạn chỉ đánh giá các vấn đề cần hiểu ngữ nghĩa.
-
-Tiêu chí:
-
-1. assertion_correct:
-Ngữ cảnh của từng entity có thực sự thể hiện đúng các assertion
-isHistorical, isNegated, isFamily hay không. Danh sách assertion rỗng
-nghĩa là entity hiện tại, không phủ định và thuộc về bệnh nhân.
-
-2. internally_consistent:
-Đoạn bệnh án có mâu thuẫn nội tại nghiêm trọng hay không, ví dụ cùng
-một thuốc vừa được mô tả là đang sử dụng vừa được mô tả là không sử
-dụng trong cùng ngữ cảnh.
-
-3. clinically_plausible:
-Tổ hợp thông tin có hoàn toàn phi lý về lâm sàng hay không. Chỉ đánh
-false đối với lỗi rõ ràng; không đánh false chỉ vì thiếu thông tin.
-
-4. suspicious_unlabeled_claims:
-Văn bản có chứa thêm chẩn đoán, triệu chứng, thuốc hoặc xét nghiệm rõ
-ràng nhưng không xuất hiện trong danh sách entity hay không. Đây chỉ
-là cảnh báo vì bạn không được cung cấp constraint gốc.
-
-Chỉ trả về một JSON object hợp lệ:
-
-{
-  "assertion_correct": true,
-  "internally_consistent": true,
-  "clinically_plausible": true,
-  "suspicious_unlabeled_claims": false,
-  "confidence": 0.0,
-  "issues": []
-}
+1. Giữ nguyên chính xác mọi nội dung nằm trong marker.
+2. Mỗi marker phải xuất hiện đúng một lần.
+3. Không sửa, dịch, rút gọn hoặc thay chính tả entity.
+4. Không thêm tên thuốc, bệnh, triệu chứng hoặc xét nghiệm
+   mục tiêu ngoài SECTION_SPEC.
+5. Không viết mã ICD-10 hoặc RxNorm.
+6. Hard-negative phrase phải xuất hiện nhưng không được đổi
+   thành target entity.
+7. Cue phủ định phải có scope rõ ràng.
+8. Nếu các entity có assertion khác nhau, phải tách clause
+   hoặc dùng liên từ tương phản rõ.
+9. Local cue rõ ràng phải phản ánh đúng scenario.
+10. Được phép dùng bullet, fragment hoặc paragraph theo style.
+11. Chỉ trả về nội dung của section, không tự viết tiêu đề.
+12. Không giải thích, không trả JSON, không dùng markdown fence.
 """.strip()
 
 
-def build_validation_prompt(note_text: str, entities: list[dict]) -> str:
-    entity_lines = []
-    for ent in entities:
-        assertions = ent.get("assertions", [])
-        assertion_text = ", ".join(assertions) if assertions else "present"
-        candidate_text = ", ".join(ent.get("candidates", [])) or "-"
-        entity_lines.append(
-            f"- {ent.get('type')}: '{ent.get('text')}' | "
-            f"assertions: {assertion_text} | candidates: {candidate_text}"
-        )
-
-    entity_block = "\n".join(entity_lines) if entity_lines else "(không có)"
-
-    return f"""Đoạn bệnh án cần kiểm tra:
----
-{note_text}
----
-
-Danh sách entity đã được gắn nhãn:
-{entity_block}
-
-Hãy đánh giá theo 4 tiêu chí đã nêu và trả lời đúng format JSON."""
-
-
-VALIDATION_JSON_SCHEMA = {
-    "name": "medical_validation",
-    "strict": True,
-    "schema": {
-        "type": "object",
-        "properties": {
-            "assertion_correct": {"type": "boolean"},
-            "internally_consistent": {"type": "boolean"},
-            "clinically_plausible": {"type": "boolean"},
-            "suspicious_unlabeled_claims": {"type": "boolean"},
-            "confidence": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1,
-            },
-            "issues": {
-                "type": "array",
-                "items": {"type": "string"},
-            },
-        },
-        "required": [
-            "assertion_correct",
-            "internally_consistent",
-            "clinically_plausible",
-            "suspicious_unlabeled_claims",
-            "confidence",
-            "issues",
-        ],
-        "additionalProperties": False,
-    },
-}
+def load_catalogs() -> dict[str, Any]:
+    return {
+        "drugs": read_jsonl(
+            CATALOG_DIR
+            / "drug_surfaces.jsonl"
+        ),
+        "diseases": read_jsonl(
+            CATALOG_DIR
+            / "disease_surfaces.jsonl"
+        ),
+        "symptoms": read_jsonl(
+            CATALOG_DIR
+            / "symptom_surfaces.jsonl"
+        ),
+        "negatives": read_jsonl(
+            CATALOG_DIR
+            / "hard_negatives.jsonl"
+        ),
+        "labs": read_jsonl(
+            CATALOG_DIR
+            / "lab_tests.jsonl"
+        ),
+        "scenarios": read_json(
+            CATALOG_DIR
+            / "assertion_scenarios.json"
+        ),
+        "document_config": read_json(
+            CATALOG_DIR
+            / "document_profiles.json"
+        ),
+    }
 
 
-def response_format_for_model(model: str) -> dict[str, Any]:
-    """Dùng strict schema khi model Groq hỗ trợ, còn lại ép JSON object."""
-    if model in {"openai/gpt-oss-20b", "openai/gpt-oss-120b"}:
-        return {
-            "type": "json_schema",
-            "json_schema": VALIDATION_JSON_SCHEMA,
-        }
-    return {"type": "json_object"}
-
-
-# =====================================================================
-# 2. GỌI MODEL Y KHOA (OpenAI-compatible, dùng chung cho Ollama/API)
-# =====================================================================
-
-def call_medical_model(
-    system_prompt: str,
-    user_prompt: str,
-    config: dict[str, Any],
+def weighted_choice(
+    records: dict[str, dict[str, Any]],
 ) -> str:
-    api_key_env = config["api_key_env"]
-    api_key = os.getenv(api_key_env)
+    keys = list(records)
+    weights = [
+        records[key].get("weight", 1)
+        for key in keys
+    ]
 
-    if not api_key:
-        raise RuntimeError(
-            f"Chưa thiết lập biến môi trường "
-            f"{api_key_env}"
-        )
+    return random.choices(
+        keys,
+        weights=weights,
+        k=1,
+    )[0]
 
-    url = (
-        config["base_url"].rstrip("/")
-        + "/chat/completions"
+
+def sample_profile(
+    document_config: dict[str, Any],
+) -> tuple[str, dict[str, Any]]:
+    profiles = document_config["profiles"]
+    profile_id = weighted_choice(profiles)
+
+    return profile_id, profiles[profile_id]
+
+
+def select_section_types(
+    profile: dict[str, Any],
+) -> list[str]:
+    selected = list(
+        profile["required_sections"]
     )
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
+    optional = list(
+        profile.get("optional_sections", [])
+    )
+
+    if optional:
+        minimum = profile.get(
+            "min_optional",
+            0,
+        )
+        maximum = min(
+            profile.get(
+                "max_optional",
+                len(optional),
+            ),
+            len(optional),
+        )
+
+        count = random.randint(
+            minimum,
+            maximum,
+        )
+
+        selected.extend(
+            random.sample(optional, count)
+        )
+
+    return selected
+
+
+def sample_surface(
+    catalog: list[dict[str, Any]],
+    *,
+    require_linking: bool = False,
+) -> dict[str, Any]:
+    eligible = [
+        item
+        for item in catalog
+        if (
+            not require_linking
+            or item.get(
+                "usable_for_linking",
+                False,
+            )
+        )
+    ]
+
+    if not eligible:
+        raise ValueError(
+            "Không có surface phù hợp."
+        )
+
+    return random.choice(eligible)
+
+
+def build_entity(
+    entity_id: str,
+    surface: dict[str, Any],
+    assertions: list[str],
+) -> EntitySpec:
+    return EntitySpec(
+        entity_id=entity_id,
+        surface_text=surface["text"],
+        entity_type=surface["entity_type"],
+        assertions=list(assertions),
+        candidates=list(
+            surface.get("candidates", [])
+        ),
+        surface_id=surface.get("surface_id"),
+        concept_id=surface.get(
+            "concept_id"
+        ),
+    )
+
+
+def sample_lab_value(
+    lab: dict[str, Any],
+) -> str:
+    low, high = lab["normal_range"]
+    decimals = int(lab.get("decimals", 1))
+
+    if random.random() < 0.70:
+        value = random.uniform(low, high)
+    else:
+        span = high - low
+
+        if random.random() < 0.5:
+            value = random.uniform(
+                max(0, low - span * 0.5),
+                low,
+            )
+        else:
+            value = random.uniform(
+                high,
+                high + span * 0.5,
+            )
+
+    if decimals == 0:
+        return str(round(value))
+
+    return f"{value:.{decimals}f}".replace(
+        ".",
+        ",",
+    )
+
+
+def build_block(
+    block_id: str,
+    scenario_id: str,
+    scenario: dict[str, Any],
+    catalogs: dict[str, Any],
+    counters: dict[str, int],
+) -> BlockSpec:
+    kind = scenario["kind"]
+
+    entity_count = random.randint(
+        scenario.get("min_entities", 1),
+        scenario.get("max_entities", 1),
+    )
+
+    entities: list[EntitySpec] = []
+
+    def next_entity_id() -> str:
+        entity_id = (
+            f"E{counters['entity']}"
+        )
+        counters["entity"] += 1
+        return entity_id
+
+    if kind == "mixed_polarity":
+        first = sample_surface(
+            catalogs["symptoms"]
+        )
+        second = sample_surface(
+            catalogs["symptoms"]
+        )
+
+        entities.append(
+            build_entity(
+                next_entity_id(),
+                first,
+                ["isNegated"],
+            )
+        )
+
+        entities.append(
+            build_entity(
+                next_entity_id(),
+                second,
+                [],
+            )
+        )
+
+    elif kind == "medication_group":
+        selected: list[
+            dict[str, Any]
+        ] = []
+
+        attempts = 0
+
+        while (
+            len(selected) < entity_count
+            and attempts < 50
+        ):
+            attempts += 1
+
+            candidate = sample_surface(
+                catalogs["drugs"],
+                require_linking=True,
+            )
+
+            key = (
+                candidate["concept_id"],
+                candidate["text"],
+            )
+
+            if any(
+                (
+                    item["concept_id"],
+                    item["text"],
+                )
+                == key
+                for item in selected
+            ):
+                continue
+
+            selected.append(candidate)
+
+        for surface in selected:
+            entities.append(
+                build_entity(
+                    next_entity_id(),
+                    surface,
+                    scenario["assertions"],
+                )
+            )
+
+    elif kind == "laboratory_group":
+        selected_labs = random.sample(
+            catalogs["labs"],
+            k=min(
+                entity_count,
+                len(catalogs["labs"]),
+            ),
+        )
+
+        for lab in selected_labs:
+            test_surface = {
+                "text": lab["test_name"],
+                "entity_type": (
+                    "TÊN_XÉT_NGHIỆM"
+                ),
+                "candidates": [],
+                "surface_id": None,
+                "concept_id": None,
+            }
+
+            result_value = sample_lab_value(
+                lab
+            )
+
+            result_surface = {
+                "text": (
+                    f"{result_value} "
+                    f"{lab['unit']}"
+                ),
+                "entity_type": (
+                    "KẾT_QUẢ_XÉT_NGHIỆM"
+                ),
+                "candidates": [],
+                "surface_id": None,
+                "concept_id": None,
+            }
+
+            entities.append(
+                build_entity(
+                    next_entity_id(),
+                    test_surface,
+                    [],
+                )
+            )
+
+            entities.append(
+                build_entity(
+                    next_entity_id(),
+                    result_surface,
+                    [],
+                )
+            )
+
+    else:
+        allowed_types = scenario[
+            "allowed_types"
+        ]
+
+        for _ in range(entity_count):
+            entity_type = random.choice(
+                allowed_types
+            )
+
+            if entity_type == "TRIỆU_CHỨNG":
+                surface = sample_surface(
+                    catalogs["symptoms"]
+                )
+            elif entity_type == "CHẨN_ĐOÁN":
+                surface = sample_surface(
+                    catalogs["diseases"],
+                    require_linking=True,
+                )
+            elif entity_type == "THUỐC":
+                surface = sample_surface(
+                    catalogs["drugs"],
+                    require_linking=True,
+                )
+            else:
+                raise ValueError(
+                    f"Unsupported type: "
+                    f"{entity_type}"
+                )
+
+            entities.append(
+                build_entity(
+                    next_entity_id(),
+                    surface,
+                    scenario.get(
+                        "assertions",
+                        [],
+                    ),
+                )
+            )
+
+    hard_negatives: list[NegativeSpec] = []
+
+    if (
+        catalogs["negatives"]
+        and random.random() < 0.30
+        and kind != "medication_group"
+    ):
+        negative = random.choice(
+            catalogs["negatives"]
+        )
+
+        negative_id = (
+            f"N{counters['negative']}"
+        )
+        counters["negative"] += 1
+
+        hard_negatives.append(
+            NegativeSpec(
+                negative_id=negative_id,
+                surface_text=negative["text"],
+                negative_type=negative[
+                    "negative_type"
+                ],
+            )
+        )
+
+    return BlockSpec(
+        block_id=block_id,
+        scenario_id=scenario_id,
+        entities=entities,
+        hard_negatives=hard_negatives,
+        instructions=[
+            scenario["instruction"]
+        ],
+    )
+
+
+def sample_case_spec(
+    case_id: str,
+    catalogs: dict[str, Any],
+) -> CaseSpec:
+    profile_id, profile = sample_profile(
+        catalogs["document_config"]
+    )
+
+    section_types = select_section_types(
+        profile
+    )
+
+    section_library = catalogs[
+        "document_config"
+    ]["sections"]
+
+    counters = {
+        "entity": 0,
+        "negative": 0,
     }
+
+    sections: list[SectionSpec] = []
+
+    for section_index, section_type in enumerate(
+        section_types
+    ):
+        section_config = section_library[
+            section_type
+        ]
+
+        scenario_id = random.choice(
+            section_config[
+                "allowed_scenarios"
+            ]
+        )
+
+        scenario = catalogs[
+            "scenarios"
+        ][scenario_id]
+
+        block = build_block(
+            block_id=(
+                f"B{section_index}"
+            ),
+            scenario_id=scenario_id,
+            scenario=scenario,
+            catalogs=catalogs,
+            counters=counters,
+        )
+
+        sections.append(
+            SectionSpec(
+                section_id=(
+                    f"S{section_index}"
+                ),
+                section_type=section_type,
+                title=random.choice(
+                    section_config["titles"]
+                ),
+                temporal_scope=(
+                    section_config[
+                        "temporal_scope"
+                    ]
+                ),
+                subject_scope=(
+                    section_config[
+                        "subject_scope"
+                    ]
+                ),
+                render_style=(
+                    section_config[
+                        "render_style"
+                    ]
+                ),
+                blocks=[block],
+            )
+        )
+
+    case_spec = CaseSpec(
+        case_id=case_id,
+        document_profile=profile_id,
+        structure_style="section_aware",
+        noise_profile=(
+            "light_noise"
+            if profile_id
+            == "mixed_noisy_document"
+            else "clean"
+        ),
+        sections=sections,
+        metadata={
+            "pipeline_version": "v3.0"
+        },
+    )
+
+    errors = validate_case_spec(case_spec)
+
+    if errors:
+        raise ValueError(
+            f"CaseSpec không hợp lệ: {errors}"
+        )
+
+    return case_spec
+
+
+def build_section_prompt(
+    case_spec: CaseSpec,
+    section: SectionSpec,
+) -> str:
+    blocks_payload: list[
+        dict[str, Any]
+    ] = []
+
+    for block in section.blocks:
+        blocks_payload.append(
+            {
+                "block_id": block.block_id,
+                "scenario_id": (
+                    block.scenario_id
+                ),
+                "target_entities": [
+                    {
+                        "id": entity.entity_id,
+                        "type": (
+                            entity.entity_type
+                        ),
+                        "marked_text": (
+                            entity.marked_text
+                        ),
+                    }
+                    for entity in block.entities
+                ],
+                "hard_negatives": [
+                    {
+                        "id": (
+                            negative.negative_id
+                        ),
+                        "type": (
+                            negative.negative_type
+                        ),
+                        "marked_text": (
+                            negative.marked_text
+                        ),
+                    }
+                    for negative in (
+                        block.hard_negatives
+                    )
+                ],
+                "instructions": (
+                    block.instructions
+                ),
+            }
+        )
 
     payload = {
-        "model": config["model"],
-        "messages": [
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
-            {
-                "role": "user",
-                "content": user_prompt,
-            },
-        ],
-        "temperature": config.get(
-            "temperature",
-            0.0,
+        "document_profile": (
+            case_spec.document_profile
         ),
-        "max_tokens": config.get(
-            "max_tokens",
-            500,
+        "noise_profile": (
+            case_spec.noise_profile
         ),
-        "response_format": response_format_for_model(config["model"]),
+        "section": {
+            "section_id": section.section_id,
+            "title": section.title,
+            "temporal_scope": (
+                section.temporal_scope
+            ),
+            "subject_scope": (
+                section.subject_scope
+            ),
+            "render_style": (
+                section.render_style
+            ),
+            "blocks": blocks_payload,
+        },
     }
 
-    response = requests.post(
-        url,
-        headers=headers,
-        json=payload,
-        timeout=config.get("timeout", 60),
+    return (
+        "SECTION_SPEC:\n"
+        + json.dumps(
+            payload,
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n\nViết nội dung bên dưới tiêu đề "
+        + f"{section.title!r}. "
+        + "Không viết lại tiêu đề."
     )
 
-    if not response.ok:
-        raise RuntimeError(
-            f"API error {response.status_code}: "
-            f"{response.text[:500]}"
-        )
 
-    data = response.json()
+def call_qwen(
+    system_prompt: str,
+    user_prompt: str,
+    *,
+    temperature: float,
+) -> str:
+    base_url = os.getenv(
+        "QWEN_BASE_URL",
+        "http://localhost:8000/v1",
+    ).rstrip("/")
 
-    text = (
-        data.get("choices", [{}])[0]
+    model = os.getenv(
+        "QWEN_MODEL",
+        "Qwen/Qwen2.5-7B-Instruct",
+    )
+
+    api_key = os.getenv(
+        "QWEN_API_KEY",
+        "local-key",
+    )
+
+    response = requests.post(
+        f"{base_url}/chat/completions",
+        headers={
+            "Authorization": (
+                f"Bearer {api_key}"
+            ),
+            "Content-Type": (
+                "application/json"
+            ),
+        },
+        json={
+            "model": model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt,
+                },
+            ],
+            "temperature": temperature,
+            "top_p": 0.9,
+            "max_tokens": 1800,
+        },
+        timeout=180,
+    )
+
+    response.raise_for_status()
+
+    payload = response.json()
+
+    output = (
+        payload.get("choices", [{}])[0]
         .get("message", {})
         .get("content", "")
         .strip()
     )
 
-    if not text:
+    if not output:
         raise ValueError(
-            "Medical model trả về nội dung rỗng"
+            "Qwen trả về output rỗng."
         )
 
-    return text
+    return output
 
 
-def parse_validation_json(raw_text: str) -> dict[str, Any]:
-    """Model đôi khi bọc markdown fence hoặc thêm text thừa quanh JSON.
-    Cố gắng trích JSON object đầu tiên tìm được."""
-    cleaned = re.sub(r"```json|```", "", raw_text).strip()
-    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-    if not match:
-        raise ValueError(f"Không tìm thấy JSON hợp lệ trong output: {raw_text[:200]}")
-    return json.loads(match.group(0))
+def build_repair_prompt(
+    original_prompt: str,
+    previous_output: str,
+    errors: list[str],
+) -> str:
+    return f"""
+PROMPT GỐC:
+{original_prompt}
+
+OUTPUT CHƯA HỢP LỆ:
+{previous_output}
+
+LỖI:
+{json.dumps(errors, ensure_ascii=False, indent=2)}
+
+Sửa output để đáp ứng prompt gốc.
+
+- Giữ nguyên mọi marker.
+- Không sửa nội dung trong marker.
+- Không thêm marker mới.
+- Chỉ trả về section đã sửa.
+""".strip()
 
 
-def validate_verdict(verdict: Any) -> dict[str, Any]:
-    if not isinstance(verdict, dict):
-        raise ValueError("Verdict không phải JSON object")
-
-    boolean_keys = {
-        "assertion_correct",
-        "internally_consistent",
-        "clinically_plausible",
-        "suspicious_unlabeled_claims",
-    }
-    required_keys = boolean_keys | {"confidence", "issues"}
-    missing_keys = required_keys - set(verdict)
-    if missing_keys:
-        raise ValueError(f"Verdict thiếu key: {sorted(missing_keys)}")
-
-    invalid_boolean_keys = [
-        key for key in boolean_keys
-        if not isinstance(verdict[key], bool)
-    ]
-    if invalid_boolean_keys:
-        raise ValueError(
-            f"Verdict có field không phải boolean: {invalid_boolean_keys}"
-        )
-
-    confidence = verdict["confidence"]
-    if (
-        isinstance(confidence, bool)
-        or not isinstance(confidence, (int, float))
-        or not 0 <= confidence <= 1
-    ):
-        raise ValueError("confidence phải là số trong khoảng [0, 1]")
-
-    issues = verdict["issues"]
-    if not isinstance(issues, list) or not all(
-        isinstance(issue, str) for issue in issues
-    ):
-        raise ValueError("issues phải là list string")
-
-    return verdict
-
-
-# =====================================================================
-# 3. VALIDATE 1 NOTE
-# =====================================================================
-
-def validate_note(
-    note_id: str,
-    note_text: str,
-    entities: list[dict[str, Any]],
-    max_retry: int = 2,
-    use_api_judge: bool = True,
+def render_section(
+    case_spec: CaseSpec,
+    section: SectionSpec,
+    *,
+    max_retry: int = 3,
 ) -> dict[str, Any]:
-    rule_result = rule_based_validate(
-        note_text=note_text,
-        entities=entities,
+    prompt = build_section_prompt(
+        case_spec,
+        section,
     )
 
-    # Lỗi chắc chắn: loại ngay, không gọi API
-    if not rule_result["passed"]:
-        return {
-            "note_id": note_id,
-            "passed": False,
-            "status": "REJECT",
-            "rule_validation": rule_result,
-            "semantic_validation": None,
-            "reason": "hard_rule_failed",
-        }
-
-    # Chế độ chỉ kiểm tra bằng rule
-    if not use_api_judge:
-        return {
-            "note_id": note_id,
-            "passed": True,
-            "status": "PASS",
-            "rule_validation": rule_result,
-            "semantic_validation": None,
-            "reason": "rule_only_pass",
-        }
-
-    prompt = build_validation_prompt(
-        note_text,
-        entities,
+    mini_case = CaseSpec(
+        case_id=case_spec.case_id,
+        document_profile=(
+            case_spec.document_profile
+        ),
+        structure_style=(
+            case_spec.structure_style
+        ),
+        noise_profile=(
+            case_spec.noise_profile
+        ),
+        sections=[section],
     )
 
-    last_error = None
+    previous_output = ""
+    errors: list[str] = []
 
     for attempt in range(1, max_retry + 1):
-        try:
-            raw = call_medical_model(
-                VALIDATION_SYSTEM_PROMPT,
-                prompt,
-                MEDICAL_MODEL_CONFIG,
-            )
-
-            verdict = validate_verdict(parse_validation_json(raw))
-            confidence = float(verdict["confidence"])
-
-            serious_semantic_error = (
-                not bool(verdict["assertion_correct"])
-                or not bool(
-                    verdict["internally_consistent"]
-                )
-                or not bool(
-                    verdict["clinically_plausible"]
+        if attempt == 1:
+            current_prompt = prompt
+            temperature = 0.45
+        else:
+            current_prompt = (
+                build_repair_prompt(
+                    prompt,
+                    previous_output,
+                    errors,
                 )
             )
+            temperature = 0.15
 
-            # Chỉ reject khi model đủ tự tin
-            if (
-                serious_semantic_error
-                and confidence >= 0.85
-            ):
-                status = "REJECT"
-                passed = False
+        output = call_qwen(
+            QWEN_SYSTEM_PROMPT,
+            current_prompt,
+            temperature=temperature,
+        )
 
-            elif (
-                bool(
-                    verdict[
-                        "suspicious_unlabeled_claims"
-                    ]
-                )
-                or confidence < 0.70
-                or bool(rule_result["warnings"])
-            ):
-                status = "FLAG_REVIEW"
-                passed = False
+        marked_section = (
+            f"{section.title}\n"
+            f"{output.strip()}"
+        )
 
-            else:
-                status = "PASS"
-                passed = True
+        errors = validate_markers(
+            marked_section,
+            mini_case,
+        )
 
+        if not errors:
             return {
-                "note_id": note_id,
-                "passed": passed,
-                "status": status,
-                "rule_validation": rule_result,
-                "semantic_validation": verdict,
+                "section_id": (
+                    section.section_id
+                ),
+                "section_type": (
+                    section.section_type
+                ),
+                "title": section.title,
+                "marked_text": (
+                    marked_section
+                ),
                 "attempt": attempt,
             }
 
-        except Exception as exc:
-            last_error = str(exc)
+        previous_output = output
 
-            if attempt < max_retry:
-                time.sleep(
-                    2 ** (attempt - 1)
-                )
-
-    # API timeout/lỗi JSON không chứng minh dữ liệu sai
-    return {
-        "note_id": note_id,
-        "passed": False,
-        "status": "ERROR",
-        "rule_validation": rule_result,
-        "semantic_validation": None,
-        "error": last_error,
-        "reason": "api_judge_failed",
-        "attempt": max_retry,
-    }
-
-# =====================================================================
-# 4. ORCHESTRATOR
-# =====================================================================
-
-def load_generated_data() -> dict[str, dict[str, Any]]:
-    """Merge contents.jsonl + labels.jsonl theo note_id."""
-    contents_path = GENERATED_DIR / "contents.jsonl"
-    labels_path = GENERATED_DIR / "labels.jsonl"
-
-    if not contents_path.exists() or not labels_path.exists():
-        raise FileNotFoundError(
-            f"Không tìm thấy {contents_path} hoặc {labels_path}. "
-            "Hãy chạy build_synthetic_data.py generate trước."
-        )
-
-    contents = {}
-    with contents_path.open(encoding="utf-8") as f:
-        for line in f:
-            obj = json.loads(line)
-            contents[obj["note_id"]] = obj["text"]
-
-    merged = {}
-    with labels_path.open(encoding="utf-8") as f:
-        for line in f:
-            obj = json.loads(line)
-            note_id = obj["note_id"]
-            if note_id in contents:
-                merged[note_id] = {
-                    "text": contents[note_id],
-                    "entities": obj["entities"],
-                    "meta": obj.get("meta", {}),
-                }
-
-    return merged
+    raise ValueError(
+        f"Render section thất bại: {errors}"
+    )
 
 
-def run_validation(limit: int | None = None) -> None:
-    data = load_generated_data()
-    note_ids = list(data.keys())
-    if limit:
-        note_ids = note_ids[:limit]
-
-    pass_path = VALIDATED_DIR / "validated_pass.jsonl"
-    flagged_path = VALIDATED_DIR / "validated_flagged.jsonl"
-    errors_path = VALIDATED_DIR / "validation_errors.jsonl"
-    report_path = VALIDATED_DIR / "validation_report.json"
-
-    total_pass = 0
-    total_flagged = 0
-    total_errors = 0
-    status_counter: dict[str, int] = {}
-    issue_counter: dict[str, int] = {}
-
-    with (
-        pass_path.open("w", encoding="utf-8") as pass_file,
-        flagged_path.open("w", encoding="utf-8") as flagged_file,
-        errors_path.open("w", encoding="utf-8") as errors_file,
+def clear_output_files() -> None:
+    for filename in (
+        "case_specs.jsonl",
+        "marked_notes.jsonl",
+        "generation_failures.jsonl",
     ):
-        for i, note_id in enumerate(note_ids, 1):
-            item = data[note_id]
-            result = validate_note(note_id, item["text"], item["entities"])
+        path = GENERATED_DIR / filename
 
-            output_record = {
-                "note_id": note_id,
-                "text": item["text"],
-                "entities": item["entities"],
-                "meta": item["meta"],
-                "validation_status": result["status"],
-                "rule_validation": result["rule_validation"],
-                "semantic_validation": result.get("semantic_validation"),
-                "error": result.get("error"),
-                "reason": result.get("reason"),
-            }
-
-            status_counter[result["status"]] = (
-                status_counter.get(result["status"], 0) + 1
-            )
-
-            if result["status"] == "PASS":
-                pass_file.write(
-                    json.dumps(output_record, ensure_ascii=False)
-                    + "\n"
-                )
-
-                total_pass += 1
-
-            elif result["status"] == "ERROR":
-                errors_file.write(
-                    json.dumps(output_record, ensure_ascii=False)
-                    + "\n"
-                )
-                total_errors += 1
-
-            else:
-                flagged_file.write(
-                    json.dumps(output_record, ensure_ascii=False)
-                    + "\n"
-                )
-
-                total_flagged += 1
-
-            semantic_validation = result.get(
-                "semantic_validation"
-            )
-
-            if semantic_validation:
-                for issue in semantic_validation.get(
-                    "issues",
-                    [],
-                ):
-                    issue_counter[issue] = (
-                        issue_counter.get(issue, 0) + 1
-                    )
-
-            print(
-                f"[{i}/{len(note_ids)}] "
-                f"{note_id}: {result['status']}"
-            )
-
-    report = {
-        "total_checked": len(note_ids),
-        "total_pass": total_pass,
-        "total_flagged": total_flagged,
-        "total_errors": total_errors,
-        "pass_rate": round(total_pass / len(note_ids), 4) if note_ids else 0.0,
-        "status_counts": status_counter,
-        "medical_model": MEDICAL_MODEL_CONFIG["model"],
-        "top_issues": sorted(issue_counter.items(), key=lambda x: -x[1])[:20],
-        "output_files": {
-            "pass": str(pass_path),
-            "flagged": str(flagged_path),
-            "errors": str(errors_path),
-        },
-    }
-    with report_path.open("w", encoding="utf-8") as f:
-        json.dump(report, f, ensure_ascii=False, indent=2)
-
-    print("\n=== HOÀN TẤT VALIDATION ===")
-    print(f"Tổng kiểm tra: {len(note_ids)}")
-    print(f"Pass: {total_pass} ({report['pass_rate']*100:.1f}%)")
-    print(f"Flagged: {total_flagged}")
-    print(f"Lỗi kỹ thuật/API: {total_errors}")
-    print(f"Pass file: {pass_path}")
-    print(f"Flagged file: {flagged_path}")
-    print(f"Report: {report_path}")
+        if path.exists():
+            path.unlink()
 
 
-# =====================================================================
-# MAIN
-# =====================================================================
-
-if __name__ == "__main__":
+def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("cmd", choices=["run"])
-    parser.add_argument("--limit", type=int, default=None, help="Chỉ test N note đầu tiên")
+
+    parser.add_argument(
+        "--num-samples",
+        type=int,
+        default=50,
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+    )
+
     args = parser.parse_args()
 
-    if args.cmd == "run":
-        run_validation(limit=args.limit)
+    ensure_directories()
+    random.seed(args.seed)
+
+    if not args.resume:
+        clear_output_files()
+
+    catalogs = load_catalogs()
+
+    run_id = datetime.now().strftime(
+        "%Y%m%d_%H%M%S"
+    )
+
+    success = 0
+    failed = 0
+
+    for index in range(args.num_samples):
+        case_id = (
+            f"{run_id}_{index:06d}"
+        )
+
+        started_at = time.perf_counter()
+
+        try:
+            case_spec = sample_case_spec(
+                case_id,
+                catalogs,
+            )
+
+            rendered_sections = [
+                render_section(
+                    case_spec,
+                    section,
+                )
+                for section in (
+                    case_spec.sections
+                )
+            ]
+
+            marked_document = "\n\n".join(
+                section["marked_text"]
+                for section in rendered_sections
+            )
+
+            marker_errors = validate_markers(
+                marked_document,
+                case_spec,
+            )
+
+            if marker_errors:
+                raise ValueError(
+                    marker_errors
+                )
+
+            append_jsonl(
+                GENERATED_DIR
+                / "case_specs.jsonl",
+                case_spec.to_dict(),
+            )
+
+            append_jsonl(
+                GENERATED_DIR
+                / "marked_notes.jsonl",
+                {
+                    "case_id": case_id,
+                    "marked_text": (
+                        marked_document
+                    ),
+                    "sections": (
+                        rendered_sections
+                    ),
+                    "meta": {
+                        "model": os.getenv(
+                            "QWEN_MODEL",
+                            (
+                                "Qwen/Qwen2.5-"
+                                "7B-Instruct"
+                            ),
+                        ),
+                        "latency_seconds": round(
+                            time.perf_counter()
+                            - started_at,
+                            3,
+                        ),
+                    },
+                },
+            )
+
+            success += 1
+
+        except Exception as exc:
+            append_jsonl(
+                GENERATED_DIR
+                / "generation_failures.jsonl",
+                {
+                    "case_id": case_id,
+                    "error": str(exc),
+                },
+            )
+
+            failed += 1
+
+        print(
+            f"[{index + 1}/{args.num_samples}] "
+            f"success={success}, failed={failed}"
+        )
+
+
+if __name__ == "__main__":
+    main()

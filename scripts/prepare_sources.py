@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-from scripts.synthetic.common import (
+from common import (
     CATALOG_DIR,
     PROCESSED_DIR,
     RAW_DIR,

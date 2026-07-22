@@ -7,10 +7,8 @@ import random
 import time
 from datetime import datetime
 from typing import Any
-
 import requests
-
-from scripts.synthetic.common import (
+from scripts.common import (
     BlockSpec,
     CATALOG_DIR,
     CaseSpec,

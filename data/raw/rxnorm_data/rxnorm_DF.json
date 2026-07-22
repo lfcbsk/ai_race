@@ -1,0 +1,632 @@
+[
+  {
+    "rxcui": "1649570",
+    "name": "Auto-Injector",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "858080",
+    "name": "Buccal Film",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "970789",
+    "name": "Buccal Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1649572",
+    "name": "Cartridge",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2269573",
+    "name": "Chewable Extended Release Oral Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "91058",
+    "name": "Chewable Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "402499",
+    "name": "Chewing Gum",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316995",
+    "name": "Delayed Release Oral Capsule",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2284290",
+    "name": "Delayed Release Oral Granules",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "10312",
+    "name": "Delayed Release Oral Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316942",
+    "name": "Disintegrating Oral Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "479172",
+    "name": "Douche",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "657710",
+    "name": "Drug Implant",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "744995",
+    "name": "Dry Powder Inhaler",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1535727",
+    "name": "Effervescent Oral Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317678",
+    "name": "Enema",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316943",
+    "name": "Extended Release Oral Capsule",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316945",
+    "name": "Extended Release Oral Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316946",
+    "name": "Extended Release Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316999",
+    "name": "Gas for Inhalation",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1540453",
+    "name": "Granules for Oral Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1540454",
+    "name": "Granules for Oral Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317000",
+    "name": "Inhalation Powder",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346161",
+    "name": "Inhalation Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2284289",
+    "name": "Inhalation Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2107948",
+    "name": "Inhalation Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1484929",
+    "name": "Injectable Foam",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316949",
+    "name": "Injectable Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316950",
+    "name": "Injectable Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1649574",
+    "name": "Injection",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316951",
+    "name": "Intraperitoneal Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1732876",
+    "name": "Intratracheal Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1856271",
+    "name": "Intrauterine System",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2719932",
+    "name": "Intravesical Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2719933",
+    "name": "Intravesical Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "152903",
+    "name": "Irrigation Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1649573",
+    "name": "Jet Injector",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316954",
+    "name": "Medicated Bar Soap",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316955",
+    "name": "Medicated Liquid Soap",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "797271",
+    "name": "Medicated Pad",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1792831",
+    "name": "Medicated Patch",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "106332",
+    "name": "Medicated Shampoo",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "797685",
+    "name": "Medicated Tape",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "721654",
+    "name": "Metered Dose Inhaler",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1797831",
+    "name": "Metered Dose Nasal Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "7067",
+    "name": "Mouthwash",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346163",
+    "name": "Mucosal Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316956",
+    "name": "Mucous Membrane Topical Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316960",
+    "name": "Nasal Gel",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316959",
+    "name": "Nasal Inhalant",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316961",
+    "name": "Nasal Ointment",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1739329",
+    "name": "Nasal Powder",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316962",
+    "name": "Nasal Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "126542",
+    "name": "Nasal Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317544",
+    "name": "Ophthalmic Cream",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316963",
+    "name": "Ophthalmic Gel",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "244286",
+    "name": "Ophthalmic Irrigation Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "91344",
+    "name": "Ophthalmic Ointment",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "7670",
+    "name": "Ophthalmic Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2637984",
+    "name": "Ophthalmic Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316964",
+    "name": "Ophthalmic Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316965",
+    "name": "Oral Capsule",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316966",
+    "name": "Oral Cream",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2269575",
+    "name": "Oral Film",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316947",
+    "name": "Oral Flakes",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346284",
+    "name": "Oral Foam",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346169",
+    "name": "Oral Gel",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317690",
+    "name": "Oral Granules",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316992",
+    "name": "Oral Lozenge",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346288",
+    "name": "Oral Ointment",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346171",
+    "name": "Oral Paste",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317691",
+    "name": "Oral Pellet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346289",
+    "name": "Oral Powder",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316968",
+    "name": "Oral Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346164",
+    "name": "Oral Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316969",
+    "name": "Oral Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317541",
+    "name": "Oral Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316989",
+    "name": "Oral Wafer",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2703097",
+    "name": "Otic Gel",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316972",
+    "name": "Otic Ointment",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316973",
+    "name": "Otic Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316974",
+    "name": "Otic Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "746839",
+    "name": "Pack",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "402496",
+    "name": "Paste",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1649571",
+    "name": "Pen Injector",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2718816",
+    "name": "Powder for Intravesical Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2719931",
+    "name": "Powder for Intravesical Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1540452",
+    "name": "Powder for Nasal Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1540455",
+    "name": "Powder for Oral Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1540456",
+    "name": "Powder for Oral Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2375729",
+    "name": "Powder for Pyelocalyceal Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317004",
+    "name": "Powder Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "721656",
+    "name": "Prefilled Syringe",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316975",
+    "name": "Rectal Cream",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317542",
+    "name": "Rectal Foam",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346170",
+    "name": "Rectal Gel",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317005",
+    "name": "Rectal Ointment",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317006",
+    "name": "Rectal Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316977",
+    "name": "Rectal Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316978",
+    "name": "Rectal Suppository",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2269578",
+    "name": "Sublingual Film",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1810682",
+    "name": "Sublingual Powder",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317007",
+    "name": "Sublingual Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316980",
+    "name": "Sustained Release Buccal Tablet",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1861409",
+    "name": "Tablet for Oral Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "10652",
+    "name": "Toothpaste",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316982",
+    "name": "Topical Cream",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346285",
+    "name": "Topical Foam",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346286",
+    "name": "Topical Gel",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1788820",
+    "name": "Topical Liquefied Gas",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316983",
+    "name": "Topical Lotion",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316984",
+    "name": "Topical Oil",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316985",
+    "name": "Topical Ointment",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317009",
+    "name": "Topical Powder",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316986",
+    "name": "Topical Solution",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "346165",
+    "name": "Topical Spray",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1649353",
+    "name": "Topical Suspension",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "316987",
+    "name": "Transdermal System",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317543",
+    "name": "Urethral Suppository",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "11103",
+    "name": "Vaginal Cream",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "1788819",
+    "name": "Vaginal Film",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "11107",
+    "name": "Vaginal Foam",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "11108",
+    "name": "Vaginal Gel",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2107950",
+    "name": "Vaginal Insert",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "317010",
+    "name": "Vaginal Ointment",
+    "tty": "DF"
+  },
+  {
+    "rxcui": "2199220",
+    "name": "Vaginal System",
+    "tty": "DF"
+  }
+]

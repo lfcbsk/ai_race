@@ -68,6 +68,82 @@ PROCEDURE_TERMS = {
 }
 
 
+SURFACE_CORRECTIONS = {
+    "o lắng": "lo lắng",
+}
+
+MANUAL_REJECT_SURFACES = {
+    "bàn chân",
+    "nâng hai cánh tay qua đầu",
+    "õm vào trong",
+    "xả màu vàng hay xanh",
+    "rung rinh",
+    "đau đầy",
+    "không có tầm nhìn",
+    "gây mất tầm nhìn",
+    "có một khối ở bụng",
+}
+
+SYMPTOM_BAD_PREFIXES = (
+    "có ",
+    "có một ",
+    "gây ",
+    "được ",
+    "nâng ",
+    "thực hiện ",
+)
+
+EMBEDDED_ASSERTION_PATTERN = re.compile(
+    r"\b(không|chưa|phủ nhận)\b",
+    re.IGNORECASE,
+)
+
+
+def prepare_catalog_surface(
+    raw_text: str,
+    entity_type: str,
+) -> tuple[str | None, str | None]:
+    text = clean_text(raw_text)
+
+    if not text:
+        return None, "empty"
+
+    text = text.rstrip(" \t\r\n,;:")
+    normalized = normalize_for_matching(text)
+
+    corrected = SURFACE_CORRECTIONS.get(
+        normalized
+    )
+    if corrected:
+        text = corrected
+        normalized = normalize_for_matching(text)
+
+    if len(text) < 3:
+        return None, "too_short"
+
+    if normalized in MANUAL_REJECT_SURFACES:
+        return None, "manual_reject"
+
+    if "\n" in text or "\r" in text:
+        return None, "multiline_fragment"
+
+    if entity_type == "TRIỆU_CHỨNG":
+        if EMBEDDED_ASSERTION_PATTERN.search(text):
+            return None, "embedded_assertion_cue"
+
+        if normalized.startswith(
+            SYMPTOM_BAD_PREFIXES
+        ):
+            return None, "contextual_prefix"
+
+        if normalized.endswith(
+            ("vào trong", "ra ngoài")
+        ) and len(normalized.split()) <= 4:
+            return None, "incomplete_directional_fragment"
+
+    return text, None
+
+
 def load_vimedner() -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
 
@@ -997,6 +1073,24 @@ ASSERTION_SCENARIOS = {
             "đã xảy ra trước đây."
         ),
     },
+    "patient_historical_negated": {
+        "kind": "single_group",
+        "weight": 8,
+        "allowed_types": [
+            "TRIỆU_CHỨNG",
+            "CHẨN_ĐOÁN",
+        ],
+        "assertions": [
+            "isNegated",
+            "isHistorical",
+        ],
+        "min_entities": 1,
+        "max_entities": 2,
+        "instruction": (
+            "Phủ định rõ các tình trạng trong "
+            "bối cảnh trước nhập viện hoặc quá khứ."
+        ),
+    },
     "family_current": {
         "kind": "single_group",
         "weight": 7,
@@ -1083,7 +1177,6 @@ DOCUMENT_CONFIG = {
             "render_style": "paragraph",
             "allowed_scenarios": [
                 "patient_historical",
-                "family_current",
                 "family_historical",
             ],
         },
@@ -1113,7 +1206,7 @@ DOCUMENT_CONFIG = {
             "render_style": "bullet_list",
             "allowed_scenarios": [
                 "patient_historical",
-                "coordinated_negation",
+                "patient_historical_negated",
             ],
         },
         "hospital_assessment": {
@@ -1367,36 +1460,93 @@ def run_prepare_data(*, seed: int = 42) -> None:
         )
     )
 
+    drug_surface_names = {
+        normalize_for_matching(surface["text"])
+        for surface in drug_surfaces
+    }
+
+    filtered_disease_surfaces: list[
+        dict[str, Any]
+    ] = []
+    rejected_disease_surfaces: list[
+        dict[str, Any]
+    ] = []
+
+    for surface in disease_surfaces:
+        cleaned, reason = prepare_catalog_surface(
+            surface["text"],
+            "CHẨN_ĐOÁN",
+        )
+        normalized = normalize_for_matching(
+            cleaned or surface["text"]
+        )
+
+        if normalized in drug_surface_names:
+            reason = "cross_type_drug_collision"
+
+        if reason:
+            rejected_disease_surfaces.append(
+                {
+                    **surface,
+                    "rejection_reason": reason,
+                }
+            )
+            continue
+
+        filtered_disease_surfaces.append(
+            {
+                **surface,
+                "text": cleaned,
+            }
+        )
+
+    disease_surfaces = filtered_disease_surfaces
+
     symptom_texts = sorted(
         {
             mention["text"]
-            for mention in (
-                vimedner["target_mentions"]
-            )
-            if mention["type"] == (
-                "TRIỆU_CHỨNG"
-            )
+            for mention in vimedner["target_mentions"]
+            if mention["type"] == "TRIỆU_CHỨNG"
         }
     )
 
-    symptom_surfaces = [
-        {
-            "surface_id": (
-                f"SYM_{index:06d}"
-            ),
-            "text": text,
-            "entity_type": "TRIỆU_CHỨNG",
-            "candidates": [],
-            "concept_id": None,
-            "profile": "vimedner",
-            "reliability": "high",
-            "usable_for_ner": True,
-            "usable_for_linking": False,
-        }
-        for index, text in enumerate(
-            symptom_texts
+    symptom_surfaces: list[dict[str, Any]] = []
+    rejected_symptom_surfaces: list[
+        dict[str, Any]
+    ] = []
+
+    for original_text in symptom_texts:
+        cleaned, reason = prepare_catalog_surface(
+            original_text,
+            "TRIỆU_CHỨNG",
         )
-    ]
+
+        if reason:
+            rejected_symptom_surfaces.append(
+                {
+                    "text": original_text,
+                    "rejection_reason": reason,
+                    "source": "ViMedNER",
+                }
+            )
+            continue
+
+        symptom_surfaces.append(
+            {
+                "surface_id": (
+                    f"SYM_{len(symptom_surfaces):06d}"
+                ),
+                "text": cleaned,
+                "original_text": original_text,
+                "entity_type": "TRIỆU_CHỨNG",
+                "candidates": [],
+                "concept_id": None,
+                "profile": "vimedner_filtered",
+                "reliability": "medium",
+                "usable_for_ner": True,
+                "usable_for_linking": False,
+            }
+        )
 
     write_jsonl(
         PROCESSED_DIR / "rxnorm_concepts.jsonl",
@@ -1419,6 +1569,16 @@ def run_prepare_data(*, seed: int = 42) -> None:
         PROCESSED_DIR
         / "unresolved_diseases.jsonl",
         unresolved_diseases,
+    )
+    write_jsonl(
+        PROCESSED_DIR
+        / "rejected_disease_surfaces.jsonl",
+        rejected_disease_surfaces,
+    )
+    write_jsonl(
+        PROCESSED_DIR
+        / "rejected_symptom_surfaces.jsonl",
+        rejected_symptom_surfaces,
     )
 
     write_jsonl(
@@ -1472,6 +1632,12 @@ def run_prepare_data(*, seed: int = 42) -> None:
                 "symptom_surfaces": len(
                     symptom_surfaces
                 ),
+                "rejected_symptom_surfaces": len(
+                    rejected_symptom_surfaces
+                ),
+                "rejected_disease_surfaces": len(
+                    rejected_disease_surfaces
+                ),
                 "hard_negatives": len(
                     procedures
                 ),
@@ -1496,6 +1662,14 @@ def run_prepare_data(*, seed: int = 42) -> None:
     print(
         f"Hard negatives: "
         f"{len(procedures)}"
+    )
+    print(
+        f"Rejected symptom surfaces: "
+        f"{len(rejected_symptom_surfaces)}"
+    )
+    print(
+        f"Rejected disease surfaces: "
+        f"{len(rejected_disease_surfaces)}"
     )
 
 

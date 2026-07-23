@@ -7,6 +7,7 @@ try:
     from scripts.common import (
         ASSERTION_ENTITY_TYPES,
         CANDIDATE_ENTITY_TYPES,
+        CaseSpec,
         FINAL_DIR,
         GENERATED_DIR,
         MARKER_PATTERN,
@@ -20,6 +21,7 @@ try:
         read_jsonl,
         validate_case_spec,
         validate_markers,
+        validate_rendered_sample,
         write_json,
         write_jsonl,
     )
@@ -28,6 +30,7 @@ except ModuleNotFoundError:
     from common import (
         ASSERTION_ENTITY_TYPES,
         CANDIDATE_ENTITY_TYPES,
+        CaseSpec,
         FINAL_DIR,
         GENERATED_DIR,
         MARKER_PATTERN,
@@ -41,6 +44,7 @@ except ModuleNotFoundError:
         read_jsonl,
         validate_case_spec,
         validate_markers,
+        validate_rendered_sample,
         write_json,
         write_jsonl,
     )
@@ -602,6 +606,61 @@ def run_validate_export() -> None:
                 case_spec,
             )
         )
+
+        section_spec_by_id = {
+            section.section_id: section
+            for section in case_spec.sections
+        }
+        rendered_section_ids: set[str] = set()
+
+        for rendered_section in note.get(
+            "sections", []
+        ):
+            section_id = rendered_section.get(
+                "section_id"
+            )
+            section = section_spec_by_id.get(
+                section_id
+            )
+
+            if section is None:
+                errors.append(
+                    f"Section không tồn tại: {section_id!r}"
+                )
+                continue
+
+            rendered_section_ids.add(section_id)
+            mini_case = CaseSpec(
+                case_id=case_spec.case_id,
+                document_profile=(
+                    case_spec.document_profile
+                ),
+                structure_style=(
+                    case_spec.structure_style
+                ),
+                noise_profile=case_spec.noise_profile,
+                sections=[section],
+            )
+            section_errors = validate_rendered_sample(
+                rendered_section.get(
+                    "marked_text", ""
+                ),
+                mini_case,
+            )
+            errors.extend(
+                f"{section_id}: {error}"
+                for error in section_errors
+            )
+
+        missing_sections = (
+            set(section_spec_by_id)
+            - rendered_section_ids
+        )
+        if missing_sections:
+            errors.append(
+                "Thiếu rendered sections: "
+                f"{sorted(missing_sections)}"
+            )
 
         if errors:
             rejected.append(

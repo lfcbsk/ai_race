@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+from collections import Counter
 import unicodedata
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -602,65 +603,709 @@ def validate_markers(
     return errors
 
 
+
+
+PLACEHOLDER_PATTERN = re.compile(
+    r"<<([EN]\d+)>>"
+)
+
+NEGATION_CUES = (
+    "không ghi nhận",
+    "không có",
+    "không thấy",
+    "không xuất hiện",
+    "chưa ghi nhận",
+    "phủ nhận",
+    "không mắc",
+    "không bị",
+    "không",
+)
+
+FAMILY_CUES = (
+    "tiền sử gia đình",
+    "người nhà",
+    "gia đình",
+    "bố",
+    "mẹ",
+    "cha",
+    "anh trai",
+    "chị gái",
+)
+
+HISTORICAL_CUES = (
+    "tiền sử",
+    "trước đây",
+    "đã từng",
+    "từng",
+    "trước nhập viện",
+    "trong quá khứ",
+)
+
+CONTRAST_CUES = (
+    "nhưng",
+    "tuy nhiên",
+    "song",
+    "trái lại",
+)
+
+BANNED_OUTPUT_TERMS = (
+    "các entity",
+    "entity là",
+    "hard-negative",
+    "hard negative",
+    "scenario_id",
+    "subject_scope",
+    "temporal_scope",
+    "surface_text",
+    "assertion",
+    "section_spec",
+    "case spec",
+    "marker",
+)
+
+
+def placeholder_for(marker_id: str) -> str:
+    return f"<<{marker_id}>>"
+
+
+def expected_placeholders(
+    case_spec: CaseSpec,
+) -> dict[str, str]:
+    return expected_marker_texts(case_spec)
+
+
+def _contains_surface(
+    text: str,
+    surface: str,
+) -> bool:
+    collapsed_text = re.sub(r"\s+", " ", text)
+    collapsed_surface = re.sub(r"\s+", " ", surface)
+
+    if not collapsed_surface:
+        return False
+
+    pattern = re.compile(
+        rf"(?<!\w){re.escape(collapsed_surface)}(?!\w)",
+        re.IGNORECASE,
+    )
+    return pattern.search(collapsed_text) is not None
+
+
+def validate_placeholder_output(
+    draft_text: str,
+    case_spec: CaseSpec,
+) -> list[str]:
+    expected = expected_placeholders(case_spec)
+    found = Counter(
+        match.group(1)
+        for match in PLACEHOLDER_PATTERN.finditer(
+            draft_text
+        )
+    )
+
+    errors: list[str] = []
+
+    for marker_id in expected:
+        count = found.get(marker_id, 0)
+        if count != 1:
+            errors.append(
+                f"{marker_id}: cần đúng 1 placeholder, "
+                f"nhưng tìm thấy {count}"
+            )
+
+    unknown = set(found) - set(expected)
+    if unknown:
+        errors.append(
+            f"Placeholder không tồn tại: {sorted(unknown)}"
+        )
+
+    if "[[" in draft_text or "]]" in draft_text:
+        errors.append(
+            "Draft không được tự tạo marker [[...]]."
+        )
+
+    without_placeholders = PLACEHOLDER_PATTERN.sub(
+        " ",
+        draft_text,
+    )
+
+    for marker_id, surface in expected.items():
+        if _contains_surface(
+            without_placeholders,
+            surface,
+        ):
+            errors.append(
+                f"{marker_id}: surface xuất hiện ngoài placeholder"
+            )
+
+    lowered = draft_text.lower()
+    for term in BANNED_OUTPUT_TERMS:
+        if term in lowered:
+            errors.append(
+                f"Prompt leakage: {term!r}"
+            )
+
+    if "```" in draft_text:
+        errors.append(
+            "Output không được chứa markdown fence."
+        )
+
+    return errors
+
+
+def expand_placeholders(
+    draft_text: str,
+    case_spec: CaseSpec,
+) -> str:
+    expected = expected_placeholders(case_spec)
+
+    def replace(match: re.Match[str]) -> str:
+        marker_id = match.group(1)
+        surface = expected[marker_id]
+        return (
+            f"[[{marker_id}]]"
+            f"{surface}"
+            f"[[/{marker_id}]]"
+        )
+
+    return PLACEHOLDER_PATTERN.sub(
+        replace,
+        draft_text,
+    )
+
+
+def strip_markers_with_positions(
+    marked_text: str,
+) -> tuple[str, dict[str, tuple[int, int]]]:
+    clean_parts: list[str] = []
+    positions: dict[str, tuple[int, int]] = {}
+    source_cursor = 0
+    clean_cursor = 0
+
+    for match in MARKER_PATTERN.finditer(
+        marked_text
+    ):
+        prefix = marked_text[
+            source_cursor:match.start()
+        ]
+        clean_parts.append(prefix)
+        clean_cursor += len(prefix)
+
+        marker_id = match.group(1)
+        surface = match.group(2)
+        start = clean_cursor
+        end = start + len(surface)
+        clean_parts.append(surface)
+        clean_cursor = end
+
+        if marker_id.startswith("E"):
+            positions[marker_id] = (start, end)
+
+        source_cursor = match.end()
+
+    clean_parts.append(
+        marked_text[source_cursor:]
+    )
+
+    return "".join(clean_parts), positions
+
+
+
+def _has_cue(
+    text: str,
+    cues: tuple[str, ...],
+) -> bool:
+    return any(
+        re.search(
+            rf"(?<!\w){re.escape(cue)}(?!\w)",
+            text,
+            flags=re.IGNORECASE,
+        )
+        is not None
+        for cue in cues
+    )
+
+
+def _scope_prefix(
+    text: str,
+    start: int,
+) -> str:
+    left = max(
+        text.rfind("\n", 0, start),
+        text.rfind(".", 0, start),
+        text.rfind(";", 0, start),
+        text.rfind(":", 0, start),
+    )
+    prefix = text[left + 1:start].lower()
+
+    contrast_positions = [
+        prefix.rfind(cue)
+        for cue in CONTRAST_CUES
+    ]
+    last_contrast = max(contrast_positions)
+
+    if last_contrast >= 0:
+        prefix = prefix[last_contrast:]
+
+    return prefix
+
+
+def _local_window(
+    text: str,
+    start: int,
+    end: int,
+) -> str:
+    return text[
+        max(0, start - 180):
+        min(len(text), end + 100)
+    ].lower()
+
+
+def validate_semantic_assertions(
+    marked_text: str,
+    case_spec: CaseSpec,
+) -> list[str]:
+    clean_text, positions = (
+        strip_markers_with_positions(
+            marked_text
+        )
+    )
+    errors: list[str] = []
+
+    section_ranges: dict[str, tuple[int, int]] = {}
+    search_cursor = 0
+    section_starts: list[tuple[SectionSpec, int]] = []
+
+    for section in case_spec.sections:
+        title_index = clean_text.find(
+            section.title,
+            search_cursor,
+        )
+        if title_index < 0:
+            title_index = search_cursor
+        section_starts.append((section, title_index))
+        search_cursor = title_index + len(section.title)
+
+    for index, (section, section_start) in enumerate(
+        section_starts
+    ):
+        section_end = (
+            section_starts[index + 1][1]
+            if index + 1 < len(section_starts)
+            else len(clean_text)
+        )
+        section_ranges[section.section_id] = (
+            section_start,
+            section_end,
+        )
+
+    for section in case_spec.sections:
+        section_start, section_end = section_ranges[
+            section.section_id
+        ]
+        for block in section.blocks:
+            for entity in block.entities:
+                if (
+                    entity.entity_type
+                    not in ASSERTION_ENTITY_TYPES
+                ):
+                    continue
+
+                position = positions.get(
+                    entity.entity_id
+                )
+                if position is None:
+                    continue
+
+                start, end = position
+                prefix = _scope_prefix(
+                    clean_text,
+                    start,
+                )
+                window = clean_text[
+                    max(section_start, start - 180):
+                    min(section_end, end + 100)
+                ].lower()
+                assertions = set(
+                    entity.assertions
+                )
+
+                has_negation = _has_cue(
+                    prefix,
+                    NEGATION_CUES,
+                )
+
+                if "isNegated" in assertions:
+                    if not has_negation:
+                        errors.append(
+                            f"{entity.entity_id}: thiếu cue phủ định "
+                            f"trong cùng scope"
+                        )
+                elif has_negation:
+                    errors.append(
+                        f"{entity.entity_id}: entity dương tính "
+                        f"nằm dưới scope phủ định"
+                    )
+
+                has_family = _has_cue(
+                    window,
+                    FAMILY_CUES,
+                )
+
+                if "isFamily" in assertions:
+                    if not has_family:
+                        errors.append(
+                            f"{entity.entity_id}: thiếu family cue"
+                        )
+                elif (
+                    has_family
+                    and section.subject_scope == "patient"
+                ):
+                    errors.append(
+                        f"{entity.entity_id}: patient entity "
+                        f"nằm trong ngữ cảnh family"
+                    )
+
+                has_historical = _has_cue(
+                    window,
+                    HISTORICAL_CUES,
+                )
+
+                if "isHistorical" in assertions:
+                    if not (
+                        has_historical
+                        or section.temporal_scope
+                        == "historical"
+                    ):
+                        errors.append(
+                            f"{entity.entity_id}: thiếu historical cue"
+                        )
+                elif (
+                    section.temporal_scope == "current"
+                    and has_historical
+                    and block.scenario_id
+                    not in {"mixed_polarity"}
+                ):
+                    errors.append(
+                        f"{entity.entity_id}: current entity "
+                        f"nằm trong ngữ cảnh historical"
+                    )
+
+    return errors
+
+
+def validate_surface_occurrences(
+    marked_text: str,
+    case_spec: CaseSpec,
+) -> list[str]:
+    clean_text, _ = strip_markers_with_positions(
+        marked_text
+    )
+    expected = expected_marker_texts(case_spec)
+    grouped: dict[str, list[str]] = {}
+
+    for marker_id, surface in expected.items():
+        grouped.setdefault(surface, []).append(
+            marker_id
+        )
+
+    errors: list[str] = []
+
+    for surface, marker_ids in grouped.items():
+        collapsed_text = re.sub(
+            r"\s+", " ", clean_text
+        )
+        collapsed_surface = re.sub(
+            r"\s+", " ", surface
+        )
+        pattern = re.compile(
+            rf"(?<!\w){re.escape(collapsed_surface)}(?!\w)",
+            re.IGNORECASE,
+        )
+        actual = len(pattern.findall(
+            collapsed_text
+        ))
+        expected_count = len(marker_ids)
+
+        if actual != expected_count:
+            errors.append(
+                f"Surface {surface!r}: cần xuất hiện "
+                f"{expected_count} lần, tìm thấy {actual}"
+            )
+
+    return errors
+
+
+def validate_render_quality(
+    marked_text: str,
+    case_spec: CaseSpec,
+) -> list[str]:
+    errors: list[str] = []
+    lowered = marked_text.lower()
+
+    for term in BANNED_OUTPUT_TERMS:
+        if term in lowered:
+            errors.append(
+                f"Prompt leakage: {term!r}"
+            )
+
+    if PLACEHOLDER_PATTERN.search(marked_text):
+        errors.append(
+            "Còn placeholder chưa được expand."
+        )
+
+    for section in case_spec.sections:
+        duplicated_title = (
+            f"{section.title}\n{section.title}"
+        )
+        if duplicated_title in marked_text:
+            errors.append(
+                f"{section.section_id}: tiêu đề bị lặp"
+            )
+
+    return errors
+
+
+def validate_rendered_sample(
+    marked_text: str,
+    case_spec: CaseSpec,
+) -> list[str]:
+    errors = validate_markers(
+        marked_text,
+        case_spec,
+    )
+    errors.extend(
+        validate_render_quality(
+            marked_text,
+            case_spec,
+        )
+    )
+    errors.extend(
+        validate_surface_occurrences(
+            marked_text,
+            case_spec,
+        )
+    )
+    errors.extend(
+        validate_semantic_assertions(
+            marked_text,
+            case_spec,
+        )
+    )
+    return errors
+
+
 def validate_case_spec(
     case_spec: CaseSpec,
 ) -> list[str]:
     errors: list[str] = []
     ids: set[str] = set()
+    normalized_surfaces: dict[str, str] = {}
 
-    for entity in iter_entities(case_spec):
-        if entity.entity_id in ids:
-            errors.append(
-                f"Trùng entity_id: {entity.entity_id}"
-            )
+    scenario_expected = {
+        "patient_current_positive": None,
+        "patient_current_negated": {"isNegated"},
+        "coordinated_negation": {"isNegated"},
+        "patient_historical": {"isHistorical"},
+        "patient_historical_negated": {
+            "isNegated",
+            "isHistorical",
+        },
+        "family_current": {"isFamily"},
+        "family_historical": {
+            "isFamily",
+            "isHistorical",
+        },
+        "home_medications": {"isHistorical"},
+        "active_medications": set(),
+        "laboratory_results": set(),
+    }
 
-        ids.add(entity.entity_id)
+    for section in case_spec.sections:
+        for block in section.blocks:
+            for entity_index, entity in enumerate(
+                block.entities
+            ):
+                if entity.entity_id in ids:
+                    errors.append(
+                        f"Trùng entity_id: {entity.entity_id}"
+                    )
 
-        if entity.entity_type not in (
-            VALID_ENTITY_TYPES
-        ):
-            errors.append(
-                f"{entity.entity_id}: type không hợp lệ "
-                f"{entity.entity_type!r}"
-            )
+                ids.add(entity.entity_id)
 
-        invalid_assertions = (
-            set(entity.assertions)
-            - VALID_ASSERTIONS
-        )
+                surface = (entity.surface_text or "").strip()
 
-        if invalid_assertions:
-            errors.append(
-                f"{entity.entity_id}: assertion sai "
-                f"{sorted(invalid_assertions)}"
-            )
+                if not surface:
+                    errors.append(
+                        f"{entity.entity_id}: surface rỗng"
+                    )
+                elif any(
+                    token in surface
+                    for token in ("[[", "]]", "<<", ">>")
+                ):
+                    errors.append(
+                        f"{entity.entity_id}: surface chứa marker"
+                    )
 
-        if (
-            entity.entity_type
-            in CANDIDATE_ENTITY_TYPES
-            and not entity.candidates
-        ):
-            errors.append(
-                f"{entity.entity_id}: thiếu candidate"
-            )
+                normalized = normalize_for_matching(surface)
 
-        if (
-            entity.entity_type
-            not in CANDIDATE_ENTITY_TYPES
-            and entity.candidates
-        ):
-            errors.append(
-                f"{entity.entity_id}: không được có "
-                f"candidate"
-            )
+                if (
+                    normalized
+                    and entity.entity_type
+                    != "KẾT_QUẢ_XÉT_NGHIỆM"
+                ):
+                    previous = normalized_surfaces.get(normalized)
+                    if previous is not None:
+                        errors.append(
+                            f"Surface trùng trong case: "
+                            f"{previous} và {entity.entity_id} "
+                            f"đều là {surface!r}"
+                        )
+                    else:
+                        normalized_surfaces[normalized] = (
+                            entity.entity_id
+                        )
 
-    for negative in iter_negatives(case_spec):
-        if negative.negative_id in ids:
-            errors.append(
-                f"Trùng marker ID: "
-                f"{negative.negative_id}"
-            )
+                if entity.entity_type not in VALID_ENTITY_TYPES:
+                    errors.append(
+                        f"{entity.entity_id}: type không hợp lệ "
+                        f"{entity.entity_type!r}"
+                    )
 
-        ids.add(negative.negative_id)
+                invalid_assertions = (
+                    set(entity.assertions)
+                    - VALID_ASSERTIONS
+                )
+
+                if invalid_assertions:
+                    errors.append(
+                        f"{entity.entity_id}: assertion sai "
+                        f"{sorted(invalid_assertions)}"
+                    )
+
+                if (
+                    entity.entity_type
+                    not in ASSERTION_ENTITY_TYPES
+                    and entity.assertions
+                ):
+                    errors.append(
+                        f"{entity.entity_id}: type "
+                        f"{entity.entity_type} không được có assertion"
+                    )
+
+                if (
+                    entity.entity_type in CANDIDATE_ENTITY_TYPES
+                    and not entity.candidates
+                ):
+                    errors.append(
+                        f"{entity.entity_id}: thiếu candidate"
+                    )
+
+                if (
+                    entity.entity_type not in CANDIDATE_ENTITY_TYPES
+                    and entity.candidates
+                ):
+                    errors.append(
+                        f"{entity.entity_id}: không được có candidate"
+                    )
+
+                if entity.entity_type == "THUỐC":
+                    if any(
+                        not str(candidate).isdigit()
+                        for candidate in entity.candidates
+                    ):
+                        errors.append(
+                            f"{entity.entity_id}: RxNorm ID phải là số"
+                        )
+
+                if entity.entity_type == "CHẨN_ĐOÁN":
+                    if any(
+                        re.fullmatch(
+                            r"[A-Z][0-9]{2}(?:\.[0-9A-Z]+)?",
+                            str(candidate).upper(),
+                        )
+                        is None
+                        for candidate in entity.candidates
+                    ):
+                        errors.append(
+                            f"{entity.entity_id}: ICD-10 ID sai định dạng"
+                        )
+
+                assertions = set(entity.assertions)
+
+                if section.temporal_scope == "historical":
+                    if (
+                        entity.entity_type in ASSERTION_ENTITY_TYPES
+                        and "isHistorical" not in assertions
+                    ):
+                        errors.append(
+                            f"{entity.entity_id}: section historical "
+                            f"nhưng thiếu isHistorical"
+                        )
+
+                if section.temporal_scope == "current":
+                    if "isHistorical" in assertions:
+                        errors.append(
+                            f"{entity.entity_id}: section current "
+                            f"nhưng có isHistorical"
+                        )
+
+                if section.subject_scope == "patient":
+                    if "isFamily" in assertions:
+                        errors.append(
+                            f"{entity.entity_id}: section patient "
+                            f"nhưng có isFamily"
+                        )
+
+                expected = scenario_expected.get(
+                    block.scenario_id
+                )
+
+                if block.scenario_id == "mixed_polarity":
+                    expected_for_entity = (
+                        {"isNegated"}
+                        if entity_index == 0
+                        else set()
+                    )
+                    if assertions != expected_for_entity:
+                        errors.append(
+                            f"{entity.entity_id}: mixed_polarity "
+                            f"cần {sorted(expected_for_entity)}, "
+                            f"nhận {sorted(assertions)}"
+                        )
+                elif expected is not None:
+                    if assertions != expected:
+                        errors.append(
+                            f"{entity.entity_id}: scenario "
+                            f"{block.scenario_id} cần "
+                            f"{sorted(expected)}, nhận "
+                            f"{sorted(assertions)}"
+                        )
+
+            for negative in block.hard_negatives:
+                if negative.negative_id in ids:
+                    errors.append(
+                        f"Trùng marker ID: {negative.negative_id}"
+                    )
+
+                ids.add(negative.negative_id)
+
+                negative_surface = (
+                    negative.surface_text or ""
+                ).strip()
+
+                if not negative_surface:
+                    errors.append(
+                        f"{negative.negative_id}: hard negative rỗng"
+                    )
+
+                normalized = normalize_for_matching(
+                    negative_surface
+                )
+                if normalized in normalized_surfaces:
+                    errors.append(
+                        f"{negative.negative_id}: trùng surface với "
+                        f"{normalized_surfaces[normalized]}"
+                    )
 
     return errors

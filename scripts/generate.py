@@ -2,27 +2,47 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import random
 import time
 from datetime import datetime
 from typing import Any
 import requests
-from scripts.common import (
-    BlockSpec,
-    CATALOG_DIR,
-    CaseSpec,
-    EntitySpec,
-    GENERATED_DIR,
-    NegativeSpec,
-    SectionSpec,
-    append_jsonl,
-    ensure_directories,
-    read_json,
-    read_jsonl,
-    validate_case_spec,
-    validate_markers,
-)
+
+try:
+    from scripts.common import (
+        BlockSpec,
+        CATALOG_DIR,
+        CaseSpec,
+        EntitySpec,
+        GENERATED_DIR,
+        NegativeSpec,
+        SectionSpec,
+        append_jsonl,
+        ensure_directories,
+        get_qwen_config,
+        read_json,
+        read_jsonl,
+        validate_case_spec,
+        validate_markers,
+    )
+except ModuleNotFoundError:
+    # Support direct execution: python scripts/generate.py
+    from common import (
+        BlockSpec,
+        CATALOG_DIR,
+        CaseSpec,
+        EntitySpec,
+        GENERATED_DIR,
+        NegativeSpec,
+        SectionSpec,
+        append_jsonl,
+        ensure_directories,
+        get_qwen_config,
+        read_json,
+        read_jsonl,
+        validate_case_spec,
+        validate_markers,
+    )
 
 
 QWEN_SYSTEM_PROMPT = """
@@ -644,33 +664,20 @@ def call_qwen(
     *,
     temperature: float,
 ) -> str:
-    base_url = os.getenv(
-        "QWEN_BASE_URL",
-        "http://localhost:8000/v1",
-    ).rstrip("/")
-
-    model = os.getenv(
-        "QWEN_MODEL",
-        "Qwen/Qwen2.5-7B-Instruct",
-    )
-
-    api_key = os.getenv(
-        "QWEN_API_KEY",
-        "local-key",
-    )
+    config = get_qwen_config()
 
     response = requests.post(
-        f"{base_url}/chat/completions",
+        f"{config.base_url}/chat/completions",
         headers={
             "Authorization": (
-                f"Bearer {api_key}"
+                f"Bearer {config.api_key}"
             ),
             "Content-Type": (
                 "application/json"
             ),
         },
         json={
-            "model": model,
+            "model": config.model,
             "messages": [
                 {
                     "role": "system",
@@ -682,10 +689,10 @@ def call_qwen(
                 },
             ],
             "temperature": temperature,
-            "top_p": 0.9,
-            "max_tokens": 1800,
+            "top_p": config.top_p,
+            "max_tokens": config.max_tokens,
         },
-        timeout=180,
+        timeout=config.timeout_seconds,
     )
 
     response.raise_for_status()
@@ -823,30 +830,16 @@ def clear_output_files() -> None:
             path.unlink()
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--num-samples",
-        type=int,
-        default=50,
-    )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=42,
-    )
-    parser.add_argument(
-        "--resume",
-        action="store_true",
-    )
-
-    args = parser.parse_args()
-
+def run_generation(
+    *,
+    num_samples: int = 50,
+    seed: int = 42,
+    resume: bool = False,
+) -> None:
     ensure_directories()
-    random.seed(args.seed)
+    random.seed(seed)
 
-    if not args.resume:
+    if not resume:
         clear_output_files()
 
     catalogs = load_catalogs()
@@ -858,7 +851,7 @@ def main() -> None:
     success = 0
     failed = 0
 
-    for index in range(args.num_samples):
+    for index in range(num_samples):
         case_id = (
             f"{run_id}_{index:06d}"
         )
@@ -914,12 +907,8 @@ def main() -> None:
                         rendered_sections
                     ),
                     "meta": {
-                        "model": os.getenv(
-                            "QWEN_MODEL",
-                            (
-                                "Qwen/Qwen2.5-"
-                                "7B-Instruct"
-                            ),
+                        "model": (
+                            get_qwen_config().model
                         ),
                         "latency_seconds": round(
                             time.perf_counter()
@@ -945,9 +934,36 @@ def main() -> None:
             failed += 1
 
         print(
-            f"[{index + 1}/{args.num_samples}] "
+            f"[{index + 1}/{num_samples}] "
             f"success={success}, failed={failed}"
         )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--num-samples",
+        type=int,
+        default=50,
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+    )
+
+    args = parser.parse_args()
+
+    run_generation(
+        num_samples=args.num_samples,
+        seed=args.seed,
+        resume=args.resume,
+    )
 
 
 if __name__ == "__main__":

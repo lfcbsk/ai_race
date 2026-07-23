@@ -1,22 +1,33 @@
 from __future__ import annotations
-
 import json
 import random
 import re
 from collections import Counter, defaultdict
-from pathlib import Path
 from typing import Any
 
-from common import (
-    CATALOG_DIR,
-    PROCESSED_DIR,
-    RAW_DIR,
-    clean_text,
-    ensure_directories,
-    normalize_for_matching,
-    write_json,
-    write_jsonl,
-)
+try:
+    from scripts.common import (
+        CATALOG_DIR,
+        PROCESSED_DIR,
+        RAW_DIR,
+        clean_text,
+        ensure_directories,
+        normalize_for_matching,
+        write_json,
+        write_jsonl,
+    )
+except ModuleNotFoundError:
+    # Support direct execution: python scripts/prepare_sources.py
+    from common import (
+        CATALOG_DIR,
+        PROCESSED_DIR,
+        RAW_DIR,
+        clean_text,
+        ensure_directories,
+        normalize_for_matching,
+        write_json,
+        write_jsonl,
+    )
 
 
 # ============================================================
@@ -381,8 +392,6 @@ def parse_rxnorm_concept(
     concept: dict[str, Any],
 ) -> dict[str, Any]:
     name = concept["name"]
-    tty = concept["tty"]
-
     brand_match = BRAND_PATTERN.search(name)
     brand = (
         brand_match.group("brand").strip()
@@ -1243,9 +1252,9 @@ DOCUMENT_CONFIG = {
 # MAIN
 # ============================================================
 
-def main() -> None:
+def run_prepare_data(*, seed: int = 42) -> None:
     ensure_directories()
-    random.seed(42)
+    random.seed(seed)
 
     vimedner = process_vimedner()
 
@@ -1488,6 +1497,10 @@ def main() -> None:
         f"Hard negatives: "
         f"{len(procedures)}"
     )
+
+
+def main() -> None:
+    run_prepare_data()
 
 
 if __name__ == "__main__":

@@ -1,955 +1,805 @@
 from __future__ import annotations
-
-import argparse
-import json
-import os
-import random
-import time
-from datetime import datetime
+import hashlib
+import re
 from typing import Any
 
-import requests
-
-from scripts.synthetic.common import (
-    BlockSpec,
-    CATALOG_DIR,
-    CaseSpec,
-    EntitySpec,
-    GENERATED_DIR,
-    NegativeSpec,
-    SectionSpec,
-    append_jsonl,
-    ensure_directories,
-    read_json,
-    read_jsonl,
-    validate_case_spec,
-    validate_markers,
-)
-
-
-QWEN_SYSTEM_PROMPT = """
-Bạn là bộ dựng văn bản cho dữ liệu NLP y khoa tổng hợp.
-
-Đầu vào là SECTION_SPEC chứa:
-- target entity có marker [[E...]]...[[/E...]];
-- hard-negative phrase có marker [[N...]]...[[/N...]];
-- scenario lâm sàng;
-- kiểu trình bày của section.
-
-Bạn chỉ được viết ngữ cảnh lâm sàng xung quanh các chuỗi
-đã được cung cấp.
-
-QUY TẮC TUYỆT ĐỐI:
-
-1. Giữ nguyên chính xác mọi nội dung nằm trong marker.
-2. Mỗi marker phải xuất hiện đúng một lần.
-3. Không sửa, dịch, rút gọn hoặc thay chính tả entity.
-4. Không thêm tên thuốc, bệnh, triệu chứng hoặc xét nghiệm
-   mục tiêu ngoài SECTION_SPEC.
-5. Không viết mã ICD-10 hoặc RxNorm.
-6. Hard-negative phrase phải xuất hiện nhưng không được đổi
-   thành target entity.
-7. Cue phủ định phải có scope rõ ràng.
-8. Nếu các entity có assertion khác nhau, phải tách clause
-   hoặc dùng liên từ tương phản rõ.
-9. Local cue rõ ràng phải phản ánh đúng scenario.
-10. Được phép dùng bullet, fragment hoặc paragraph theo style.
-11. Chỉ trả về nội dung của section, không tự viết tiêu đề.
-12. Không giải thích, không trả JSON, không dùng markdown fence.
-""".strip()
+try:
+    from scripts.common import (
+        ASSERTION_ENTITY_TYPES,
+        CANDIDATE_ENTITY_TYPES,
+        FINAL_DIR,
+        GENERATED_DIR,
+        MARKER_PATTERN,
+        PROCESSED_DIR,
+        VALID_ASSERTIONS,
+        VALID_ENTITY_TYPES,
+        case_spec_from_dict,
+        entity_section_map,
+        ensure_directories,
+        iter_entities,
+        read_jsonl,
+        validate_case_spec,
+        validate_markers,
+        write_json,
+        write_jsonl,
+    )
+except ModuleNotFoundError:
+    # Support direct execution: python scripts/validate_medical.py
+    from common import (
+        ASSERTION_ENTITY_TYPES,
+        CANDIDATE_ENTITY_TYPES,
+        FINAL_DIR,
+        GENERATED_DIR,
+        MARKER_PATTERN,
+        PROCESSED_DIR,
+        VALID_ASSERTIONS,
+        VALID_ENTITY_TYPES,
+        case_spec_from_dict,
+        entity_section_map,
+        ensure_directories,
+        iter_entities,
+        read_jsonl,
+        validate_case_spec,
+        validate_markers,
+        write_json,
+        write_jsonl,
+    )
 
 
-def load_catalogs() -> dict[str, Any]:
+NEGATION_CUES = {
+    "không",
+    "không có",
+    "không ghi nhận",
+    "phủ nhận",
+    "chưa từng",
+    "không xuất hiện",
+}
+
+FAMILY_CUES = {
+    "bố",
+    "mẹ",
+    "cha",
+    "gia đình",
+    "người nhà",
+    "anh trai",
+    "chị gái",
+}
+
+HISTORICAL_CUES = {
+    "tiền sử",
+    "trước đây",
+    "đã từng",
+    "trước nhập viện",
+    "trong quá khứ",
+}
+
+
+def build_entity_spec_map(
+    case_spec,
+) -> dict[str, Any]:
     return {
-        "drugs": read_jsonl(
-            CATALOG_DIR
-            / "drug_surfaces.jsonl"
-        ),
-        "diseases": read_jsonl(
-            CATALOG_DIR
-            / "disease_surfaces.jsonl"
-        ),
-        "symptoms": read_jsonl(
-            CATALOG_DIR
-            / "symptom_surfaces.jsonl"
-        ),
-        "negatives": read_jsonl(
-            CATALOG_DIR
-            / "hard_negatives.jsonl"
-        ),
-        "labs": read_jsonl(
-            CATALOG_DIR
-            / "lab_tests.jsonl"
-        ),
-        "scenarios": read_json(
-            CATALOG_DIR
-            / "assertion_scenarios.json"
-        ),
-        "document_config": read_json(
-            CATALOG_DIR
-            / "document_profiles.json"
-        ),
+        entity.entity_id: entity
+        for entity in iter_entities(
+            case_spec
+        )
     }
 
 
-def weighted_choice(
-    records: dict[str, dict[str, Any]],
-) -> str:
-    keys = list(records)
-    weights = [
-        records[key].get("weight", 1)
-        for key in keys
-    ]
-
-    return random.choices(
-        keys,
-        weights=weights,
-        k=1,
-    )[0]
-
-
-def sample_profile(
-    document_config: dict[str, Any],
-) -> tuple[str, dict[str, Any]]:
-    profiles = document_config["profiles"]
-    profile_id = weighted_choice(profiles)
-
-    return profile_id, profiles[profile_id]
-
-
-def select_section_types(
-    profile: dict[str, Any],
-) -> list[str]:
-    selected = list(
-        profile["required_sections"]
+def strip_markers_and_align(
+    marked_text: str,
+    case_spec,
+) -> tuple[str, list[dict[str, Any]]]:
+    entity_specs = build_entity_spec_map(
+        case_spec
     )
 
-    optional = list(
-        profile.get("optional_sections", [])
-    )
+    clean_parts: list[str] = []
+    entities: list[dict[str, Any]] = []
 
-    if optional:
-        minimum = profile.get(
-            "min_optional",
-            0,
-        )
-        maximum = min(
-            profile.get(
-                "max_optional",
-                len(optional),
-            ),
-            len(optional),
-        )
+    source_cursor = 0
+    clean_cursor = 0
 
-        count = random.randint(
-            minimum,
-            maximum,
-        )
-
-        selected.extend(
-            random.sample(optional, count)
-        )
-
-    return selected
-
-
-def sample_surface(
-    catalog: list[dict[str, Any]],
-    *,
-    require_linking: bool = False,
-) -> dict[str, Any]:
-    eligible = [
-        item
-        for item in catalog
-        if (
-            not require_linking
-            or item.get(
-                "usable_for_linking",
-                False,
-            )
-        )
-    ]
-
-    if not eligible:
-        raise ValueError(
-            "Không có surface phù hợp."
-        )
-
-    return random.choice(eligible)
-
-
-def build_entity(
-    entity_id: str,
-    surface: dict[str, Any],
-    assertions: list[str],
-) -> EntitySpec:
-    return EntitySpec(
-        entity_id=entity_id,
-        surface_text=surface["text"],
-        entity_type=surface["entity_type"],
-        assertions=list(assertions),
-        candidates=list(
-            surface.get("candidates", [])
-        ),
-        surface_id=surface.get("surface_id"),
-        concept_id=surface.get(
-            "concept_id"
-        ),
-    )
-
-
-def sample_lab_value(
-    lab: dict[str, Any],
-) -> str:
-    low, high = lab["normal_range"]
-    decimals = int(lab.get("decimals", 1))
-
-    if random.random() < 0.70:
-        value = random.uniform(low, high)
-    else:
-        span = high - low
-
-        if random.random() < 0.5:
-            value = random.uniform(
-                max(0, low - span * 0.5),
-                low,
-            )
-        else:
-            value = random.uniform(
-                high,
-                high + span * 0.5,
-            )
-
-    if decimals == 0:
-        return str(round(value))
-
-    return f"{value:.{decimals}f}".replace(
-        ".",
-        ",",
-    )
-
-
-def build_block(
-    block_id: str,
-    scenario_id: str,
-    scenario: dict[str, Any],
-    catalogs: dict[str, Any],
-    counters: dict[str, int],
-) -> BlockSpec:
-    kind = scenario["kind"]
-
-    entity_count = random.randint(
-        scenario.get("min_entities", 1),
-        scenario.get("max_entities", 1),
-    )
-
-    entities: list[EntitySpec] = []
-
-    def next_entity_id() -> str:
-        entity_id = (
-            f"E{counters['entity']}"
-        )
-        counters["entity"] += 1
-        return entity_id
-
-    if kind == "mixed_polarity":
-        first = sample_surface(
-            catalogs["symptoms"]
-        )
-        second = sample_surface(
-            catalogs["symptoms"]
-        )
-
-        entities.append(
-            build_entity(
-                next_entity_id(),
-                first,
-                ["isNegated"],
-            )
-        )
-
-        entities.append(
-            build_entity(
-                next_entity_id(),
-                second,
-                [],
-            )
-        )
-
-    elif kind == "medication_group":
-        selected: list[
-            dict[str, Any]
-        ] = []
-
-        attempts = 0
-
-        while (
-            len(selected) < entity_count
-            and attempts < 50
-        ):
-            attempts += 1
-
-            candidate = sample_surface(
-                catalogs["drugs"],
-                require_linking=True,
-            )
-
-            key = (
-                candidate["concept_id"],
-                candidate["text"],
-            )
-
-            if any(
-                (
-                    item["concept_id"],
-                    item["text"],
-                )
-                == key
-                for item in selected
-            ):
-                continue
-
-            selected.append(candidate)
-
-        for surface in selected:
-            entities.append(
-                build_entity(
-                    next_entity_id(),
-                    surface,
-                    scenario["assertions"],
-                )
-            )
-
-    elif kind == "laboratory_group":
-        selected_labs = random.sample(
-            catalogs["labs"],
-            k=min(
-                entity_count,
-                len(catalogs["labs"]),
-            ),
-        )
-
-        for lab in selected_labs:
-            test_surface = {
-                "text": lab["test_name"],
-                "entity_type": (
-                    "TÊN_XÉT_NGHIỆM"
-                ),
-                "candidates": [],
-                "surface_id": None,
-                "concept_id": None,
-            }
-
-            result_value = sample_lab_value(
-                lab
-            )
-
-            result_surface = {
-                "text": (
-                    f"{result_value} "
-                    f"{lab['unit']}"
-                ),
-                "entity_type": (
-                    "KẾT_QUẢ_XÉT_NGHIỆM"
-                ),
-                "candidates": [],
-                "surface_id": None,
-                "concept_id": None,
-            }
-
-            entities.append(
-                build_entity(
-                    next_entity_id(),
-                    test_surface,
-                    [],
-                )
-            )
-
-            entities.append(
-                build_entity(
-                    next_entity_id(),
-                    result_surface,
-                    [],
-                )
-            )
-
-    else:
-        allowed_types = scenario[
-            "allowed_types"
+    for match in MARKER_PATTERN.finditer(
+        marked_text
+    ):
+        prefix = marked_text[
+            source_cursor:match.start()
         ]
 
-        for _ in range(entity_count):
-            entity_type = random.choice(
-                allowed_types
+        clean_parts.append(prefix)
+        clean_cursor += len(prefix)
+
+        marker_id = match.group(1)
+        surface_text = match.group(2)
+
+        start = clean_cursor
+        end = start + len(surface_text)
+
+        clean_parts.append(surface_text)
+        clean_cursor = end
+
+        if marker_id.startswith("E"):
+            spec = entity_specs[marker_id]
+
+            entity = {
+                "entity_id": marker_id,
+                "text": surface_text,
+                "type": spec.entity_type,
+                "position": [start, end],
+            }
+
+            if (
+                spec.entity_type
+                in ASSERTION_ENTITY_TYPES
+            ):
+                entity["assertions"] = list(
+                    spec.assertions
+                )
+
+            if (
+                spec.entity_type
+                in CANDIDATE_ENTITY_TYPES
+            ):
+                entity["candidates"] = list(
+                    spec.candidates
+                )
+
+            entities.append(entity)
+
+        source_cursor = match.end()
+
+    clean_parts.append(
+        marked_text[source_cursor:]
+    )
+
+    clean_text = "".join(clean_parts)
+
+    entities.sort(
+        key=lambda entity: (
+            entity["position"][0],
+            entity["position"][1],
+        )
+    )
+
+    return clean_text, entities
+
+
+def validate_output_schema(
+    text: str,
+    entities: list[dict[str, Any]],
+    *,
+    rxnorm_ids: set[str],
+    icd10_ids: set[str],
+) -> list[str]:
+    errors: list[str] = []
+
+    occupied: list[tuple[int, int]] = []
+
+    for index, entity in enumerate(entities):
+        prefix = f"Entity {index}"
+
+        entity_type = entity.get("type")
+        position = entity.get("position")
+        entity_text = entity.get("text")
+
+        if entity_type not in VALID_ENTITY_TYPES:
+            errors.append(
+                f"{prefix}: type sai"
+            )
+            continue
+
+        if (
+            not isinstance(position, list)
+            or len(position) != 2
+        ):
+            errors.append(
+                f"{prefix}: position sai"
+            )
+            continue
+
+        start, end = position
+
+        if not (
+            isinstance(start, int)
+            and isinstance(end, int)
+            and 0 <= start < end <= len(text)
+        ):
+            errors.append(
+                f"{prefix}: position ngoài text"
+            )
+            continue
+
+        if text[start:end] != entity_text:
+            errors.append(
+                f"{prefix}: text-position mismatch"
             )
 
-            if entity_type == "TRIỆU_CHỨNG":
-                surface = sample_surface(
-                    catalogs["symptoms"]
-                )
-            elif entity_type == "CHẨN_ĐOÁN":
-                surface = sample_surface(
-                    catalogs["diseases"],
-                    require_linking=True,
-                )
-            elif entity_type == "THUỐC":
-                surface = sample_surface(
-                    catalogs["drugs"],
-                    require_linking=True,
+        if any(
+            start < old_end
+            and end > old_start
+            for old_start, old_end
+            in occupied
+        ):
+            errors.append(
+                f"{prefix}: overlap entity"
+            )
+
+        occupied.append((start, end))
+
+        if entity_type in ASSERTION_ENTITY_TYPES:
+            assertions = entity.get(
+                "assertions"
+            )
+
+            if not isinstance(assertions, list):
+                errors.append(
+                    f"{prefix}: thiếu assertions"
                 )
             else:
-                raise ValueError(
-                    f"Unsupported type: "
-                    f"{entity_type}"
+                invalid = (
+                    set(assertions)
+                    - VALID_ASSERTIONS
                 )
 
-            entities.append(
-                build_entity(
-                    next_entity_id(),
-                    surface,
-                    scenario.get(
-                        "assertions",
-                        [],
-                    ),
-                )
+                if invalid:
+                    errors.append(
+                        f"{prefix}: assertions sai "
+                        f"{sorted(invalid)}"
+                    )
+
+        if entity_type in CANDIDATE_ENTITY_TYPES:
+            candidates = entity.get(
+                "candidates"
             )
 
-    hard_negatives: list[NegativeSpec] = []
+            if (
+                not isinstance(candidates, list)
+                or not candidates
+            ):
+                errors.append(
+                    f"{prefix}: thiếu candidates"
+                )
+                continue
+
+            if entity_type == "THUỐC":
+                unknown = (
+                    set(candidates)
+                    - rxnorm_ids
+                )
+            else:
+                unknown = (
+                    set(candidates)
+                    - icd10_ids
+                )
+
+            if unknown:
+                errors.append(
+                    f"{prefix}: candidate không tồn tại "
+                    f"{sorted(unknown)}"
+                )
+
+    return errors
+
+
+def assertion_quality_warnings(
+    text: str,
+    entity: dict[str, Any],
+    section,
+) -> list[str]:
+    warnings: list[str] = []
+
+    assertions = entity.get(
+        "assertions",
+        [],
+    )
+
+    start, end = entity["position"]
+
+    window = text[
+        max(0, start - 120):
+        min(len(text), end + 80)
+    ].lower()
 
     if (
-        catalogs["negatives"]
-        and random.random() < 0.30
-        and kind != "medication_group"
+        "isNegated" in assertions
+        and not any(
+            cue in window
+            for cue in NEGATION_CUES
+        )
     ):
-        negative = random.choice(
-            catalogs["negatives"]
+        warnings.append(
+            "Không tìm thấy cue phủ định gần entity."
         )
 
-        negative_id = (
-            f"N{counters['negative']}"
+    if (
+        "isFamily" in assertions
+        and not any(
+            cue in window
+            for cue in FAMILY_CUES
         )
-        counters["negative"] += 1
+    ):
+        warnings.append(
+            "Không tìm thấy family cue gần entity."
+        )
 
-        hard_negatives.append(
-            NegativeSpec(
-                negative_id=negative_id,
-                surface_text=negative["text"],
-                negative_type=negative[
-                    "negative_type"
-                ],
+    if "isHistorical" in assertions:
+        section_is_historical = (
+            section.temporal_scope
+            == "historical"
+        )
+
+        local_historical = any(
+            cue in window
+            for cue in HISTORICAL_CUES
+        )
+
+        if not (
+            section_is_historical
+            or local_historical
+        ):
+            warnings.append(
+                "Không tìm thấy historical cue "
+                "hoặc historical section."
             )
-        )
 
-    return BlockSpec(
-        block_id=block_id,
-        scenario_id=scenario_id,
-        entities=entities,
-        hard_negatives=hard_negatives,
-        instructions=[
-            scenario["instruction"]
-        ],
-    )
+    return warnings
 
 
-def sample_case_spec(
-    case_id: str,
-    catalogs: dict[str, Any],
-) -> CaseSpec:
-    profile_id, profile = sample_profile(
-        catalogs["document_config"]
-    )
-
-    section_types = select_section_types(
-        profile
-    )
-
-    section_library = catalogs[
-        "document_config"
-    ]["sections"]
-
-    counters = {
-        "entity": 0,
-        "negative": 0,
+def clean_submission_entity(
+    entity: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in entity.items()
+        if key != "entity_id"
     }
 
-    sections: list[SectionSpec] = []
 
-    for section_index, section_type in enumerate(
-        section_types
-    ):
-        section_config = section_library[
-            section_type
-        ]
-
-        scenario_id = random.choice(
-            section_config[
-                "allowed_scenarios"
-            ]
-        )
-
-        scenario = catalogs[
-            "scenarios"
-        ][scenario_id]
-
-        block = build_block(
-            block_id=(
-                f"B{section_index}"
-            ),
-            scenario_id=scenario_id,
-            scenario=scenario,
-            catalogs=catalogs,
-            counters=counters,
-        )
-
-        sections.append(
-            SectionSpec(
-                section_id=(
-                    f"S{section_index}"
-                ),
-                section_type=section_type,
-                title=random.choice(
-                    section_config["titles"]
-                ),
-                temporal_scope=(
-                    section_config[
-                        "temporal_scope"
-                    ]
-                ),
-                subject_scope=(
-                    section_config[
-                        "subject_scope"
-                    ]
-                ),
-                render_style=(
-                    section_config[
-                        "render_style"
-                    ]
-                ),
-                blocks=[block],
-            )
-        )
-
-    case_spec = CaseSpec(
-        case_id=case_id,
-        document_profile=profile_id,
-        structure_style="section_aware",
-        noise_profile=(
-            "light_noise"
-            if profile_id
-            == "mixed_noisy_document"
-            else "clean"
-        ),
-        sections=sections,
-        metadata={
-            "pipeline_version": "v3.0"
-        },
-    )
-
-    errors = validate_case_spec(case_spec)
-
-    if errors:
-        raise ValueError(
-            f"CaseSpec không hợp lệ: {errors}"
-        )
-
-    return case_spec
-
-
-def build_section_prompt(
-    case_spec: CaseSpec,
-    section: SectionSpec,
+def sample_split(
+    sample: dict[str, Any],
+    *,
+    validation_ratio: float = 0.20,
 ) -> str:
-    blocks_payload: list[
-        dict[str, Any]
-    ] = []
+    concept_ids = sorted(
+        {
+            candidate
+            for entity in sample["entities"]
+            for candidate in entity.get(
+                "candidates",
+                [],
+            )
+        }
+    )
 
-    for block in section.blocks:
-        blocks_payload.append(
-            {
-                "block_id": block.block_id,
-                "scenario_id": (
-                    block.scenario_id
-                ),
-                "target_entities": [
-                    {
-                        "id": entity.entity_id,
-                        "type": (
-                            entity.entity_type
-                        ),
-                        "marked_text": (
-                            entity.marked_text
-                        ),
-                    }
-                    for entity in block.entities
-                ],
-                "hard_negatives": [
-                    {
-                        "id": (
-                            negative.negative_id
-                        ),
-                        "type": (
-                            negative.negative_type
-                        ),
-                        "marked_text": (
-                            negative.marked_text
-                        ),
-                    }
-                    for negative in (
-                        block.hard_negatives
-                    )
-                ],
-                "instructions": (
-                    block.instructions
-                ),
-            }
+    if concept_ids:
+        signature = "|".join(concept_ids)
+    else:
+        signature = "|".join(
+            sorted(
+                entity["text"]
+                for entity in sample[
+                    "entities"
+                ]
+            )
         )
 
-    payload = {
-        "document_profile": (
-            case_spec.document_profile
-        ),
-        "noise_profile": (
-            case_spec.noise_profile
-        ),
-        "section": {
-            "section_id": section.section_id,
-            "title": section.title,
-            "temporal_scope": (
-                section.temporal_scope
-            ),
-            "subject_scope": (
-                section.subject_scope
-            ),
-            "render_style": (
-                section.render_style
-            ),
-            "blocks": blocks_payload,
-        },
-    }
+    digest = hashlib.sha1(
+        signature.encode("utf-8")
+    ).hexdigest()
+
+    bucket = int(
+        digest[:8],
+        16,
+    ) % 10000
 
     return (
-        "SECTION_SPEC:\n"
-        + json.dumps(
-            payload,
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n\nViết nội dung bên dưới tiêu đề "
-        + f"{section.title!r}. "
-        + "Không viết lại tiêu đề."
+        "val"
+        if bucket
+        < int(validation_ratio * 10000)
+        else "train"
     )
 
 
-def call_qwen(
-    system_prompt: str,
-    user_prompt: str,
-    *,
-    temperature: float,
-) -> str:
-    base_url = os.getenv(
-        "QWEN_BASE_URL",
-        "http://localhost:8000/v1",
-    ).rstrip("/")
+def export_gliner(
+    samples: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    output: list[dict[str, Any]] = []
 
-    model = os.getenv(
-        "QWEN_MODEL",
-        "Qwen/Qwen2.5-7B-Instruct",
-    )
-
-    api_key = os.getenv(
-        "QWEN_API_KEY",
-        "local-key",
-    )
-
-    response = requests.post(
-        f"{base_url}/chat/completions",
-        headers={
-            "Authorization": (
-                f"Bearer {api_key}"
-            ),
-            "Content-Type": (
-                "application/json"
-            ),
-        },
-        json={
-            "model": model,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": system_prompt,
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt,
-                },
-            ],
-            "temperature": temperature,
-            "top_p": 0.9,
-            "max_tokens": 1800,
-        },
-        timeout=180,
-    )
-
-    response.raise_for_status()
-
-    payload = response.json()
-
-    output = (
-        payload.get("choices", [{}])[0]
-        .get("message", {})
-        .get("content", "")
-        .strip()
-    )
-
-    if not output:
-        raise ValueError(
-            "Qwen trả về output rỗng."
+    for sample in samples:
+        output.append(
+            {
+                "note_id": sample["note_id"],
+                "text": sample["text"],
+                "entities": [
+                    {
+                        "start": (
+                            entity["position"][0]
+                        ),
+                        "end": (
+                            entity["position"][1]
+                        ),
+                        "label": entity["type"],
+                    }
+                    for entity in sample[
+                        "entities"
+                    ]
+                ],
+            }
         )
 
     return output
 
 
-def build_repair_prompt(
-    original_prompt: str,
-    previous_output: str,
-    errors: list[str],
+def convert_assertion_markers(
+    marked_section: str,
 ) -> str:
-    return f"""
-PROMPT GỐC:
-{original_prompt}
-
-OUTPUT CHƯA HỢP LỆ:
-{previous_output}
-
-LỖI:
-{json.dumps(errors, ensure_ascii=False, indent=2)}
-
-Sửa output để đáp ứng prompt gốc.
-
-- Giữ nguyên mọi marker.
-- Không sửa nội dung trong marker.
-- Không thêm marker mới.
-- Chỉ trả về section đã sửa.
-""".strip()
-
-
-def render_section(
-    case_spec: CaseSpec,
-    section: SectionSpec,
-    *,
-    max_retry: int = 3,
-) -> dict[str, Any]:
-    prompt = build_section_prompt(
-        case_spec,
-        section,
+    # Negative markers chỉ được bỏ marker.
+    marked_section = re.sub(
+        r"\[\[(N\d+)\]\]"
+        r"(.*?)"
+        r"\[\[/\1\]\]",
+        lambda match: match.group(2),
+        marked_section,
+        flags=re.DOTALL,
     )
 
-    mini_case = CaseSpec(
-        case_id=case_spec.case_id,
-        document_profile=(
-            case_spec.document_profile
+    # Entity marker đổi sang <E0>...</E0>.
+    marked_section = re.sub(
+        r"\[\[(E\d+)\]\]"
+        r"(.*?)"
+        r"\[\[/\1\]\]",
+        lambda match: (
+            f"<{match.group(1)}>"
+            f"{match.group(2)}"
+            f"</{match.group(1)}>"
         ),
-        structure_style=(
-            case_spec.structure_style
-        ),
-        noise_profile=(
-            case_spec.noise_profile
-        ),
-        sections=[section],
+        marked_section,
+        flags=re.DOTALL,
     )
 
-    previous_output = ""
-    errors: list[str] = []
+    return marked_section
 
-    for attempt in range(1, max_retry + 1):
-        if attempt == 1:
-            current_prompt = prompt
-            temperature = 0.45
-        else:
-            current_prompt = (
-                build_repair_prompt(
-                    prompt,
-                    previous_output,
-                    errors,
+
+def export_assertion_records(
+    case_specs: dict[str, Any],
+    marked_notes: dict[str, Any],
+    selected_ids: set[str],
+) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+
+    for case_id in selected_ids:
+        case_spec = case_specs[case_id]
+        note = marked_notes[case_id]
+
+        section_by_id = {
+            section.section_id: section
+            for section in (
+                case_spec.sections
+            )
+        }
+
+        for rendered_section in note[
+            "sections"
+        ]:
+            section_id = rendered_section[
+                "section_id"
+            ]
+
+            section = section_by_id[
+                section_id
+            ]
+
+            entities = [
+                entity
+                for block in section.blocks
+                for entity in block.entities
+                if entity.entity_type
+                in ASSERTION_ENTITY_TYPES
+            ]
+
+            if not entities:
+                continue
+
+            records.append(
+                {
+                    "case_id": case_id,
+                    "section_id": section_id,
+                    "section_title": (
+                        section.title
+                    ),
+                    "context": (
+                        convert_assertion_markers(
+                            rendered_section[
+                                "marked_text"
+                            ]
+                        )
+                    ),
+                    "entities": [
+                        {
+                            "id": (
+                                entity.entity_id
+                            ),
+                            "type": (
+                                entity.entity_type
+                            ),
+                            "assertions": (
+                                entity.assertions
+                            ),
+                        }
+                        for entity in entities
+                    ],
+                }
+            )
+
+    return records
+
+
+def run_validate_export() -> None:
+    ensure_directories()
+
+    raw_case_specs = read_jsonl(
+        GENERATED_DIR / "case_specs.jsonl"
+    )
+
+    raw_marked_notes = read_jsonl(
+        GENERATED_DIR / "marked_notes.jsonl"
+    )
+
+    case_specs = {
+        raw["case_id"]: (
+            case_spec_from_dict(raw)
+        )
+        for raw in raw_case_specs
+    }
+
+    marked_notes = {
+        raw["case_id"]: raw
+        for raw in raw_marked_notes
+    }
+
+    rxnorm_ids = {
+        record["concept_id"]
+        for record in read_jsonl(
+            PROCESSED_DIR
+            / "rxnorm_concepts.jsonl"
+        )
+    }
+
+    icd10_ids = {
+        record["concept_id"]
+        for record in read_jsonl(
+            PROCESSED_DIR
+            / "icd10_concepts.jsonl"
+        )
+    }
+
+    accepted: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+
+    for case_id, case_spec in (
+        case_specs.items()
+    ):
+        note = marked_notes.get(case_id)
+
+        if note is None:
+            rejected.append(
+                {
+                    "case_id": case_id,
+                    "errors": [
+                        "Không tìm thấy marked note."
+                    ],
+                }
+            )
+            continue
+
+        errors = validate_case_spec(
+            case_spec
+        )
+
+        errors.extend(
+            validate_markers(
+                note["marked_text"],
+                case_spec,
+            )
+        )
+
+        if errors:
+            rejected.append(
+                {
+                    "case_id": case_id,
+                    "errors": errors,
+                }
+            )
+            continue
+
+        text, internal_entities = (
+            strip_markers_and_align(
+                note["marked_text"],
+                case_spec,
+            )
+        )
+
+        schema_errors = validate_output_schema(
+            text,
+            internal_entities,
+            rxnorm_ids=rxnorm_ids,
+            icd10_ids=icd10_ids,
+        )
+
+        if schema_errors:
+            rejected.append(
+                {
+                    "case_id": case_id,
+                    "errors": schema_errors,
+                }
+            )
+            continue
+
+        section_map = entity_section_map(
+            case_spec
+        )
+
+        warnings: list[
+            dict[str, Any]
+        ] = []
+
+        for entity in internal_entities:
+            entity_warnings = (
+                assertion_quality_warnings(
+                    text,
+                    entity,
+                    section_map[
+                        entity["entity_id"]
+                    ],
                 )
             )
-            temperature = 0.15
 
-        output = call_qwen(
-            QWEN_SYSTEM_PROMPT,
-            current_prompt,
-            temperature=temperature,
-        )
+            if entity_warnings:
+                warnings.append(
+                    {
+                        "entity_id": (
+                            entity["entity_id"]
+                        ),
+                        "warnings": (
+                            entity_warnings
+                        ),
+                    }
+                )
 
-        marked_section = (
-            f"{section.title}\n"
-            f"{output.strip()}"
-        )
+        clean_entities = [
+            clean_submission_entity(entity)
+            for entity in internal_entities
+        ]
 
-        errors = validate_markers(
-            marked_section,
-            mini_case,
-        )
-
-        if not errors:
-            return {
-                "section_id": (
-                    section.section_id
+        accepted.append(
+            {
+                "note_id": case_id,
+                "text": text,
+                "entities": clean_entities,
+                "document_profile": (
+                    case_spec.document_profile
                 ),
-                "section_type": (
-                    section.section_type
+                "noise_profile": (
+                    case_spec.noise_profile
                 ),
-                "title": section.title,
-                "marked_text": (
-                    marked_section
-                ),
-                "attempt": attempt,
+                "quality_warnings": warnings,
             }
+        )
 
-        previous_output = output
-
-    raise ValueError(
-        f"Render section thất bại: {errors}"
+    write_jsonl(
+        GENERATED_DIR
+        / "accepted_samples.jsonl",
+        accepted,
     )
 
+    write_jsonl(
+        GENERATED_DIR
+        / "rejected_samples.jsonl",
+        rejected,
+    )
 
-def clear_output_files() -> None:
-    for filename in (
-        "case_specs.jsonl",
-        "marked_notes.jsonl",
-        "generation_failures.jsonl",
-    ):
-        path = GENERATED_DIR / filename
+    split_by_id = {
+        sample["note_id"]: sample_split(
+            sample
+        )
+        for sample in accepted
+    }
 
-        if path.exists():
-            path.unlink()
+    train_samples = [
+        sample
+        for sample in accepted
+        if split_by_id[sample["note_id"]]
+        == "train"
+    ]
+
+    val_samples = [
+        sample
+        for sample in accepted
+        if split_by_id[sample["note_id"]]
+        == "val"
+    ]
+
+    write_jsonl(
+        FINAL_DIR / "end_to_end_train.jsonl",
+        train_samples,
+    )
+    write_jsonl(
+        FINAL_DIR / "end_to_end_val.jsonl",
+        val_samples,
+    )
+
+    write_jsonl(
+        FINAL_DIR / "gliner_train.jsonl",
+        export_gliner(train_samples),
+    )
+    write_jsonl(
+        FINAL_DIR / "gliner_val.jsonl",
+        export_gliner(val_samples),
+    )
+
+    train_ids = {
+        sample["note_id"]
+        for sample in train_samples
+    }
+
+    val_ids = {
+        sample["note_id"]
+        for sample in val_samples
+    }
+
+    write_jsonl(
+        FINAL_DIR
+        / "assertion_train.jsonl",
+        export_assertion_records(
+            case_specs,
+            marked_notes,
+            train_ids,
+        ),
+    )
+
+    write_jsonl(
+        FINAL_DIR
+        / "assertion_val.jsonl",
+        export_assertion_records(
+            case_specs,
+            marked_notes,
+            val_ids,
+        ),
+    )
+
+    write_json(
+        FINAL_DIR / "split_manifest.json",
+        {
+            "accepted": len(accepted),
+            "rejected": len(rejected),
+            "train": len(train_samples),
+            "val": len(val_samples),
+            "train_ratio": (
+                round(
+                    len(train_samples)
+                    / max(1, len(accepted)),
+                    4,
+                )
+            ),
+            "validation_ratio": (
+                round(
+                    len(val_samples)
+                    / max(1, len(accepted)),
+                    4,
+                )
+            ),
+        },
+    )
+
+    print("\n=== VALIDATE + EXPORT COMPLETE ===")
+    print(f"Accepted: {len(accepted)}")
+    print(f"Rejected: {len(rejected)}")
+    print(f"Train: {len(train_samples)}")
+    print(f"Val: {len(val_samples)}")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--num-samples",
-        type=int,
-        default=50,
-    )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=42,
-    )
-    parser.add_argument(
-        "--resume",
-        action="store_true",
-    )
-
-    args = parser.parse_args()
-
-    ensure_directories()
-    random.seed(args.seed)
-
-    if not args.resume:
-        clear_output_files()
-
-    catalogs = load_catalogs()
-
-    run_id = datetime.now().strftime(
-        "%Y%m%d_%H%M%S"
-    )
-
-    success = 0
-    failed = 0
-
-    for index in range(args.num_samples):
-        case_id = (
-            f"{run_id}_{index:06d}"
-        )
-
-        started_at = time.perf_counter()
-
-        try:
-            case_spec = sample_case_spec(
-                case_id,
-                catalogs,
-            )
-
-            rendered_sections = [
-                render_section(
-                    case_spec,
-                    section,
-                )
-                for section in (
-                    case_spec.sections
-                )
-            ]
-
-            marked_document = "\n\n".join(
-                section["marked_text"]
-                for section in rendered_sections
-            )
-
-            marker_errors = validate_markers(
-                marked_document,
-                case_spec,
-            )
-
-            if marker_errors:
-                raise ValueError(
-                    marker_errors
-                )
-
-            append_jsonl(
-                GENERATED_DIR
-                / "case_specs.jsonl",
-                case_spec.to_dict(),
-            )
-
-            append_jsonl(
-                GENERATED_DIR
-                / "marked_notes.jsonl",
-                {
-                    "case_id": case_id,
-                    "marked_text": (
-                        marked_document
-                    ),
-                    "sections": (
-                        rendered_sections
-                    ),
-                    "meta": {
-                        "model": os.getenv(
-                            "QWEN_MODEL",
-                            (
-                                "Qwen/Qwen2.5-"
-                                "7B-Instruct"
-                            ),
-                        ),
-                        "latency_seconds": round(
-                            time.perf_counter()
-                            - started_at,
-                            3,
-                        ),
-                    },
-                },
-            )
-
-            success += 1
-
-        except Exception as exc:
-            append_jsonl(
-                GENERATED_DIR
-                / "generation_failures.jsonl",
-                {
-                    "case_id": case_id,
-                    "error": str(exc),
-                },
-            )
-
-            failed += 1
-
-        print(
-            f"[{index + 1}/{args.num_samples}] "
-            f"success={success}, failed={failed}"
-        )
+    run_validate_export()
 
 
 if __name__ == "__main__":

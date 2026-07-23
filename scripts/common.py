@@ -1,19 +1,25 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import unicodedata
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
+from dotenv import load_dotenv
+
 
 # ============================================================
 # PATHS
 # ============================================================
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-RAW_DIR = ROOT_DIR / "raw"
+ROOT_DIR = Path(__file__).resolve().parents[1]
+ENV_PATH = ROOT_DIR / ".env"
+load_dotenv(ENV_PATH)
+
+RAW_DIR = ROOT_DIR / "data" / "raw"
 
 SYNTHETIC_DIR = ROOT_DIR / "data" / "synthetic"
 PROCESSED_DIR = SYNTHETIC_DIR / "processed"
@@ -280,6 +286,138 @@ class CaseSpec:
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
+
+def require_env(name: str) -> str:
+    value = os.getenv(name, "").strip()
+
+    if not value:
+        raise ValueError(
+            f"Thiếu biến môi trường bắt buộc: {name}"
+        )
+
+    return value
+
+
+def env_int(name: str, default: int) -> int:
+    raw_value = os.getenv(name)
+
+    if raw_value is None or not raw_value.strip():
+        return default
+
+    try:
+        return int(raw_value)
+    except ValueError as exc:
+        raise ValueError(
+            f"{name} phải là số nguyên, nhận được "
+            f"{raw_value!r}."
+        ) from exc
+
+
+def env_float(name: str, default: float) -> float:
+    raw_value = os.getenv(name)
+
+    if raw_value is None or not raw_value.strip():
+        return default
+
+    try:
+        return float(raw_value)
+    except ValueError as exc:
+        raise ValueError(
+            f"{name} phải là số, nhận được "
+            f"{raw_value!r}."
+        ) from exc
+
+
+@dataclass(frozen=True)
+class QwenConfig:
+    base_url: str
+    model: str
+    api_key: str
+
+    timeout_seconds: int
+    max_tokens: int
+
+    temperature: float
+    repair_temperature: float
+    top_p: float
+
+
+def get_qwen_config() -> QwenConfig:
+    base_url = require_env(
+        "QWEN_BASE_URL"
+    ).rstrip("/")
+
+    model = require_env(
+        "QWEN_MODEL"
+    )
+
+    api_key = require_env(
+        "QWEN_API_KEY"
+    )
+
+    timeout_seconds = env_int(
+        "QWEN_TIMEOUT_SECONDS",
+        300,
+    )
+
+    max_tokens = env_int(
+        "QWEN_MAX_TOKENS",
+        900,
+    )
+
+    temperature = env_float(
+        "QWEN_TEMPERATURE",
+        0.35,
+    )
+
+    repair_temperature = env_float(
+        "QWEN_REPAIR_TEMPERATURE",
+        0.10,
+    )
+
+    top_p = env_float(
+        "QWEN_TOP_P",
+        0.90,
+    )
+
+    if timeout_seconds <= 0:
+        raise ValueError(
+            "QWEN_TIMEOUT_SECONDS phải lớn hơn 0."
+        )
+
+    if max_tokens <= 0:
+        raise ValueError(
+            "QWEN_MAX_TOKENS phải lớn hơn 0."
+        )
+
+    if not 0 <= temperature <= 2:
+        raise ValueError(
+            "QWEN_TEMPERATURE phải nằm trong [0, 2]."
+        )
+
+    if not 0 <= repair_temperature <= 2:
+        raise ValueError(
+            "QWEN_REPAIR_TEMPERATURE "
+            "phải nằm trong [0, 2]."
+        )
+
+    if not 0 < top_p <= 1:
+        raise ValueError(
+            "QWEN_TOP_P phải nằm trong (0, 1]."
+        )
+
+    return QwenConfig(
+        base_url=base_url,
+        model=model,
+        api_key=api_key,
+        timeout_seconds=timeout_seconds,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        repair_temperature=(
+            repair_temperature
+        ),
+        top_p=top_p,
+    )
 
 def case_spec_from_dict(
     payload: dict[str, Any],

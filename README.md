@@ -139,25 +139,115 @@ uv run hf download BAAI/bge-reranker-v2-m3 `
 Hai model BGE không làm thay đổi kết quả của `src.run_inference` hiện tại vì CLI
 đang dùng linker lexical mặc định.
 
-## 4. Cấu trúc dữ liệu
+## 4. Cấu trúc repository và flow dữ liệu
+
+Các thư mục chính:
+
+```text
+.
+├── scripts/                     # Tạo và kiểm tra synthetic data
+│   ├── common.py                # Path, schema, JSON/JSONL, cấu hình Qwen
+│   ├── prepare_sources.py       # Raw ontology/ViMedNER → processed + catalogs
+│   ├── generate.py              # Catalogs + Qwen → text có marker + CaseSpec
+│   └── validate_medical.py      # Căn offset, validate và export dataset
+├── src/
+│   ├── preprocessing/           # Load document, normalize, quản lý offset
+│   ├── ner/                     # GLiNER dataset, training và inference
+│   ├── assertion/               # isNegated/isHistorical/isFamily
+│   ├── linking/                 # ICD-10/RxNorm candidate và reranking
+│   ├── validation_output/       # Kiểm tra và serialize output cuộc thi
+│   ├── clinical_pipeline.py     # Ghép NER → assertion → linking
+│   ├── train_ner.py             # CLI fine-tune NER
+│   └── run_inference.py         # CLI TXT → JSONL + output.zip
+├── data/
+│   ├── raw/                     # Input của synthetic pipeline
+│   ├── synthetic/               # Toàn bộ artifact synthetic
+│   └── test_set/                # Input/output inference
+├── tests/                       # Unit test
+├── models/                      # Checkpoint tải hoặc fine-tune; tạo khi cần
+├── .env                         # Cấu hình generation; không commit secret
+└── pyproject.toml               # Dependency và cấu hình tool
+```
+
+Chi tiết `data/synthetic` sau khi chạy đủ ba stage:
 
 ```text
 data/
-├── generated/
-│   ├── contents.jsonl
-│   └── labels.jsonl
-├── validated/
-│   └── validated_pass.jsonl
-├── test_set/
-│   └── input/
-│       ├── 1.txt
+├── raw/
+│   ├── ViMedNER.txt
+│   ├── DM ICD10-19_8_BYT.xlsx
+│   └── rxnorm_data/
+│       ├── rxnorm_IN.json
+│       ├── rxnorm_BN.json
 │       └── ...
-├── icd_mapping_final.json
-└── drug_mapping_final.json
+├── synthetic/
+│   ├── processed/
+│   │   ├── vimedner_entities.jsonl
+│   │   ├── vimedner_audit.json
+│   │   ├── rxnorm_concepts.jsonl
+│   │   ├── rxnorm_families.jsonl
+│   │   ├── icd10_concepts.jsonl
+│   │   ├── unresolved_treatments.jsonl
+│   │   └── unresolved_diseases.jsonl
+│   ├── catalogs/
+│   │   ├── drug_surfaces.jsonl
+│   │   ├── disease_surfaces.jsonl
+│   │   ├── symptom_surfaces.jsonl
+│   │   ├── hard_negatives.jsonl
+│   │   ├── lab_tests.jsonl
+│   │   ├── assertion_scenarios.json
+│   │   ├── document_profiles.json
+│   │   └── generation_pool.json
+│   ├── generated/
+│   │   ├── case_specs.jsonl
+│   │   ├── marked_notes.jsonl
+│   │   ├── generation_failures.jsonl
+│   │   ├── accepted_samples.jsonl
+│   │   └── rejected_samples.jsonl
+│   └── final/
+│       ├── end_to_end_train.jsonl
+│       ├── end_to_end_val.jsonl
+│       ├── gliner_train.jsonl
+│       ├── gliner_val.jsonl
+│       ├── assertion_train.jsonl
+│       ├── assertion_val.jsonl
+│       └── split_manifest.json
+└── test_set/
+    ├── input/
+    │   ├── 1.txt
+    │   └── ...
+    ├── predictions.jsonl
+    ├── prediction_errors.jsonl
+    └── output.zip
 ```
 
-Synthetic content và label luôn lưu riêng. Chúng chỉ được ghép thành
-`MedicalDocument` trong RAM khi chuẩn bị fine-tuning.
+Flow synthetic:
+
+```text
+data/raw
+  │
+  ▼  scripts.prepare_sources
+processed + catalogs
+  │
+  ▼  scripts.generate + Qwen OpenAI-compatible API
+case_specs.jsonl + marked_notes.jsonl
+  │
+  ▼  scripts.validate_medical
+accepted/rejected + final train/val datasets
+```
+
+Flow inference:
+
+```text
+data/test_set/input/*.txt
+  → load + normalize
+  → GLiNER NER
+  → assertion detection
+  → ICD-10/RxNorm linking
+  → schema validation
+  → predictions.jsonl
+  → output.zip/output/<note_id>.json
+```
 
 ## 5. Kiểm tra project
 
@@ -189,31 +279,41 @@ Kết quả dự kiến:
 
 ## 6. Kiểm tra training data
 
-Bước này preprocess synthetic data, map raw offset sang normalized offset, kiểm
-tra entity text và chuyển sang format GLiNER. Chưa load model và chưa train:
+`src.train_ner` hỗ trợ hai loại input:
+
+- cặp `contents.jsonl` + `labels.jsonl` theo format synthetic split cũ;
+- một file GLiNER token-level có `tokenized_text` và `ner`.
+
+Dry-run với cặp content/label:
 
 ```powershell
 uv run python -m src.train_ner `
-  --contents data/generated/contents.jsonl `
-  --labels data/generated/labels.jsonl `
+  --contents path/to/contents.jsonl `
+  --labels path/to/labels.jsonl `
   --model models/gliner-base `
   --output models/medical-gliner `
   --validation-ratio 0.1 `
   --dry-run
 ```
 
-Với dữ liệu hiện tại, kết quả dự kiến:
+Dry-run với dataset GLiNER token-level:
 
-```json
-{
-  "train_samples": 194,
-  "eval_samples": 22,
-  "dataset_errors": 1
-}
+```powershell
+uv run python -m src.train_ner `
+  --train path/to/gliner_tokenized.jsonl `
+  --model models/gliner-base `
+  --output models/medical-gliner `
+  --validation-ratio 0.1 `
+  --dry-run
 ```
 
-Sample lỗi bị loại khỏi training; khi train thật, chi tiết được ghi vào
+Dry-run preprocess, kiểm tra span và chia train/eval nhưng chưa load model.
+Sample lỗi từ cặp content/label được loại; khi train thật, chi tiết được ghi vào
 `models/medical-gliner/dataset_errors.jsonl`.
+
+Không truyền trực tiếp `data/synthetic/final/gliner_train.jsonl` vào `--train`:
+file exporter này đang dùng character offset, trong khi trainer yêu cầu token
+offset.
 
 ## 7. Fine-tune GLiNER
 
@@ -221,8 +321,8 @@ Sample lỗi bị loại khỏi training; khi train thật, chi tiết được 
 
 ```powershell
 uv run python -m src.train_ner `
-  --contents data/generated/contents.jsonl `
-  --labels data/generated/labels.jsonl `
+  --contents path/to/contents.jsonl `
+  --labels path/to/labels.jsonl `
   --model models/gliner-base `
   --output models/medical-gliner `
   --max-steps 2000 `
@@ -238,8 +338,8 @@ GPU hỗ trợ BF16.
 
 ```powershell
 uv run python -m src.train_ner `
-  --contents data/generated/contents.jsonl `
-  --labels data/generated/labels.jsonl `
+  --contents path/to/contents.jsonl `
+  --labels path/to/labels.jsonl `
   --model models/gliner-base `
   --output models/medical-gliner `
   --max-steps 2000 `
@@ -377,19 +477,211 @@ Lệnh trả metric exact-match và overlap-match theo entity type.
 
 ## 10. Tạo lại synthetic data — không bắt buộc để inference
 
-Các file synthetic hiện đã có trong `data/generated`. Chỉ chạy phần này khi có
-raw seed/ontology và muốn sinh lại dữ liệu:
+Synthetic pipeline tạo cả văn bản và label. Ba stage phải chạy theo thứ tự:
 
-```powershell
-uv run python build_synthetic_data.py survey
-uv run python build_synthetic_data.py build_pool
-uv run python build_synthetic_data.py generate 100
+```text
+prepare_sources → generate → validate_medical
 ```
 
-Generation và `validate_medical.py` có thể gọi dịch vụ bên ngoài tùy cấu hình
-`.env`; chúng không nằm trong inference self-hosted.
+### 10.1. Input bắt buộc
 
-## 11. Flow ngắn nhất từ clone đến output
+Đặt raw data tại đúng các đường dẫn:
+
+```text
+data/raw/ViMedNER.txt
+data/raw/DM ICD10-19_8_BYT.xlsx
+data/raw/rxnorm_data/*.json
+```
+
+`scripts/common.py` xác định root từ vị trí file nên có thể gọi module khi
+working directory là root repository. Khuyến nghị dùng `python -m scripts...`
+thay vì chạy từ bên trong thư mục `scripts`.
+
+### 10.2. Cấu hình Qwen trong `.env`
+
+`scripts/common.py` tự nạp `.env` ở root bằng `python-dotenv`. Ba biến bắt buộc:
+
+```env
+QWEN_BASE_URL=http://localhost:8000/v1
+QWEN_API_KEY=local-key
+QWEN_MODEL=Qwen/Qwen2.5-7B-Instruct
+```
+
+Các biến tùy chọn và giá trị mặc định:
+
+```env
+QWEN_TIMEOUT_SECONDS=300
+QWEN_MAX_TOKENS=900
+QWEN_TEMPERATURE=0.35
+QWEN_REPAIR_TEMPERATURE=0.10
+QWEN_TOP_P=0.90
+```
+
+`QWEN_TIMEOUT_SECONDS`, `QWEN_MAX_TOKENS` và `QWEN_TOP_P` được dùng trực tiếp
+khi gọi API. `generate.py` hiện đặt temperature là `0.45` ở lần sinh đầu và
+`0.15` ở các lần repair; hai biến temperature trong config được nạp và validate
+nhưng chưa override hai giá trị này.
+
+API phải tương thích OpenAI Chat Completions và phục vụ endpoint:
+
+```text
+POST <QWEN_BASE_URL>/chat/completions
+```
+
+Với Qwen local qua vLLM, `QWEN_MODEL` phải trùng model ID server đang serve.
+Với provider bên ngoài, thay URL, key và model bằng giá trị do provider cung
+cấp. Không commit API key.
+
+Kiểm tra `.env` đã được nạp mà không in key:
+
+```powershell
+uv run python -c "from scripts.common import get_qwen_config; c=get_qwen_config(); print(c.base_url); print(c.model); print('API key configured:', bool(c.api_key))"
+```
+
+Kiểm tra một request trước khi generate:
+
+```powershell
+uv run python -c "from scripts.generate import call_qwen; print(call_qwen('Bạn là trợ lý.', 'Chỉ trả lời đúng một từ: OK', temperature=0.1))"
+```
+
+### 10.3. Stage 1 — chuẩn bị processed data và catalog
+
+```powershell
+uv run python -m scripts.prepare_sources
+```
+
+Stage này:
+
+- đọc ViMedNER, RxNorm và ICD-10;
+- chuẩn hóa concept/surface;
+- tách các treatment chưa resolve và disease chưa resolve để audit;
+- tạo catalog thuốc, bệnh, triệu chứng, hard negative, xét nghiệm;
+- tạo scenario assertion và document profile.
+
+Các file trong `processed/` và `catalogs/` được mở bằng mode ghi mới, vì vậy
+chạy lại stage này sẽ ghi đè artifact cũ.
+
+### 10.4. Stage 2 — sinh text và label spec
+
+Sinh mới 50 case:
+
+```powershell
+uv run python -m scripts.generate --num-samples 50 --seed 42
+```
+
+Mặc định `--num-samples=50`, `--seed=42`. Khi không có `--resume`,
+`generate.py` xóa ba file generation cũ trước khi chạy:
+
+```text
+case_specs.jsonl
+marked_notes.jsonl
+generation_failures.jsonl
+```
+
+Sinh thêm và giữ dữ liệu cũ:
+
+```powershell
+uv run python -m scripts.generate `
+  --num-samples 50 `
+  --seed 43 `
+  --resume
+```
+
+Nên đổi seed giữa các batch. Với `--resume`, record mới được append vào cuối
+JSONL; stage không deduplicate dữ liệu cũ.
+
+Vai trò các file:
+
+- `case_specs.jsonl`: label/spec nguồn gồm entity type, assertion, candidate
+  ICD-10/RxNorm, cấu trúc section và scenario.
+- `marked_notes.jsonl`: text do LLM sinh, entity được bao bởi marker
+  `[[E0]]...[[/E0]]`; liên kết với spec bằng `case_id`.
+- `generation_failures.jsonl`: một record cho mỗi case lỗi, gồm `case_id` và
+  thông báo lỗi.
+
+`generate.py` bắt exception theo từng case để batch tiếp tục chạy. Vì vậy process
+có thể kết thúc mà vẫn có `failed > 0`; luôn kiểm tra file failure thay vì chỉ
+dựa vào exit code.
+
+Kiểm tra nhanh số record:
+
+```powershell
+Get-Content data/synthetic/generated/case_specs.jsonl |
+  Measure-Object -Line
+Get-Content data/synthetic/generated/marked_notes.jsonl |
+  Measure-Object -Line
+Get-Content data/synthetic/generated/generation_failures.jsonl
+```
+
+### 10.5. Stage 3 — validate, căn offset và export label
+
+```powershell
+uv run python -m scripts.validate_medical
+```
+
+Stage này:
+
+1. Ghép `case_specs.jsonl` và `marked_notes.jsonl` bằng `case_id`.
+2. Kiểm tra marker đủ, đúng một lần và không bị LLM sửa nội dung.
+3. Bỏ marker và tính character offset `[start, end)` trên clean text.
+4. Kiểm tra entity type, assertion và candidate có trong ontology.
+5. Ghi accepted/rejected.
+6. Chia train/validation theo hash ổn định.
+7. Export end-to-end, NER và assertion dataset.
+
+Các output `accepted_samples.jsonl`, `rejected_samples.jsonl` và toàn bộ
+`data/synthetic/final/` được ghi lại từ đầu mỗi lần validate.
+
+Schema end-to-end rút gọn:
+
+```json
+{
+  "note_id": "20260723_120000_000000",
+  "text": "Bệnh nhân không sốt.",
+  "entities": [
+    {
+      "text": "sốt",
+      "type": "TRIỆU_CHỨNG",
+      "position": [16, 19],
+      "assertions": ["isNegated"]
+    }
+  ]
+}
+```
+
+`gliner_*.jsonl` chứa `text` và entity character span dạng
+`{"start": ..., "end": ..., "label": ...}`. `assertion_*.jsonl` chứa context có
+marker `<E0>...</E0>` cùng assertion của từng entity.
+
+Lưu ý: CLI `src.train_ner --train` hiện nhận format GLiNER token-level
+`tokenized_text` + `ner`, còn `gliner_*.jsonl` của synthetic exporter là
+character-span. Cần bước chuyển đổi sang token-level trước khi truyền trực tiếp
+cho `--train`; không đổi tên file rồi train ngay.
+
+### 10.6. Chạy toàn bộ synthetic flow
+
+Sinh mới hoàn toàn:
+
+```powershell
+uv run python -m scripts.prepare_sources
+uv run python -m scripts.generate --num-samples 100 --seed 42
+uv run python -m scripts.validate_medical
+```
+
+Thêm batch rồi rebuild toàn bộ output validated:
+
+```powershell
+uv run python -m scripts.generate `
+  --num-samples 100 `
+  --seed 43 `
+  --resume
+uv run python -m scripts.validate_medical
+```
+
+Generation có thể gọi API bên ngoài tùy `QWEN_BASE_URL`. Inference trong
+`src.run_inference` vẫn self-hosted và không sử dụng API generation.
+
+## 11. Flow ngắn nhất từ clone đến inference output
 
 ```powershell
 uv python install 3.12
@@ -398,26 +690,22 @@ uv sync --python 3.12
 uv run hf download urchade/gliner_multi-v2.1 `
   --local-dir models/gliner-base
 
-uv run python -m src.train_ner `
-  --contents data/generated/contents.jsonl `
-  --labels data/generated/labels.jsonl `
-  --model models/gliner-base `
-  --output models/medical-gliner `
-  --max-steps 2000 `
-  --batch-size 8 `
-  --device cuda `
-  --bf16
+uv run python -m pytest
+
+uv run python -m src.run_inference --dry-run
 
 uv run python -m src.run_inference `
   --input data/test_set/input `
-  --model models/medical-gliner `
-  --device cuda `
-  --output data/test_set/predictions.jsonl `
-  --zip-output data/test_set/output.zip
+  --model models/gliner-base `
+  --device cpu `
+  --output data/test_set/baseline_predictions.jsonl `
+  --zip-output data/test_set/baseline_output.zip
 ```
 
-Trên máy CPU, thay `--device cuda` bằng `--device cpu`, bỏ `--bf16` và giảm
-`--batch-size` xuống `2`.
+Flow này tạo baseline output để kiểm tra toàn bộ pipeline mà chưa cần fine-tune.
+Để tạo output cuối, fine-tune theo mục 7 rồi thay `models/gliner-base` bằng
+`models/medical-gliner`. Trên NVIDIA GPU có thể đổi `--device cpu` thành
+`--device cuda`.
 
 ## 12. Lỗi thường gặp
 
@@ -441,6 +729,39 @@ Giảm batch size:
 ```text
 --batch-size 8 → 4 → 2 → 1
 ```
+
+### Synthetic generation báo `failed` cho mọi case
+
+Đọc lỗi thật:
+
+```powershell
+Get-Content data/synthetic/generated/generation_failures.jsonl
+```
+
+Các nguyên nhân thường gặp:
+
+- `Thiếu biến môi trường ...`: tên biến trong `.env` không đúng hoặc giá trị
+  rỗng.
+- `NameResolutionError`: `QWEN_BASE_URL` vẫn là placeholder hoặc hostname sai.
+- HTTP `401`: API key sai, hết hiệu lực hoặc thuộc provider khác.
+- HTTP `404`: endpoint hoặc model slug không tồn tại; model free có thể đã bị
+  provider gỡ.
+- `marker`/`Render section thất bại`: LLM sửa, bỏ hoặc lặp marker dù API request
+  thành công; script tự repair tối đa ba lần.
+
+Thử một request nhỏ theo mục 10.2, sau đó generate một case trước:
+
+```powershell
+uv run python -m scripts.generate --num-samples 1 --seed 42
+```
+
+Chỉ tăng `--num-samples` sau khi thấy `success=1, failed=0`.
+
+### `case_specs.jsonl` hoặc `marked_notes.jsonl` không tồn tại
+
+Không có case nào generate thành công. `generate.py` chỉ ghi hai file này sau
+khi LLM trả text vượt qua kiểm tra marker. Xem `generation_failures.jsonl` và
+không chạy validate cho tới khi hai file có cùng số record.
 
 ### PowerShell hiển thị tiếng Việt bị lỗi
 

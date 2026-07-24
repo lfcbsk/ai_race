@@ -5,15 +5,12 @@ from dataclasses import dataclass
 from typing import Any, Iterable, Protocol
 
 from src.preprocessing import MedicalDocument, NormalizedDocument, normalize_text
+from src.preprocessing.constants import (
+    ENTITY_TYPES,
+    NER_NORMALIZE_KWARGS,
+)
 
-# Nhãn thực thể của đề thi — khớp build_synthetic_data.py và schemas.EntityAnnotation.
-DEFAULT_LABELS: list[str] = [
-    "TRIỆU_CHỨNG",
-    "CHẨN_ĐOÁN",
-    "THUỐC",
-    "TÊN_XÉT_NGHIỆM",
-    "KẾT_QUẢ_XÉT_NGHIỆM",
-]
+DEFAULT_LABELS = list(ENTITY_TYPES)
 
 # Model GLiNER đa ngôn ngữ pretrained — dùng làm baseline zero-shot cho tiếng Việt
 # (chưa có checkpoint GLiNER riêng cho tiếng Việt). Sau này thay bằng checkpoint
@@ -77,6 +74,7 @@ class RawEntityPrediction:
     normalized_start: int
     normalized_end: int
     confidence: float
+    source: str = "gliner"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -85,6 +83,7 @@ class RawEntityPrediction:
             "type": self.entity_type,
             "normalized_position": [self.normalized_start, self.normalized_end],
             "confidence": self.confidence,
+            "source": self.source,
         }
 
 
@@ -171,14 +170,30 @@ def predict_document(
             if end > text_length:
                 continue
 
+            predicted_label = str(
+                raw["label"]
+            )
+
+            if predicted_label not in labels:
+                continue
+
+            prediction_text = (
+                normalized.normalized_text[
+                    start:end
+                ]
+            )
+
             predictions.append(
                 RawEntityPrediction(
                     document_id=document.document_id,
-                    text=raw.get("text", normalized.normalized_text[start:end]),
-                    entity_type=str(raw["label"]),
+                    text=prediction_text,
+                    entity_type=predicted_label,
                     normalized_start=start,
                     normalized_end=end,
-                    confidence=float(raw["score"]),
+                    confidence=float(
+                        raw["score"]
+                    ),
+                    source="gliner",
                 )
             )
 

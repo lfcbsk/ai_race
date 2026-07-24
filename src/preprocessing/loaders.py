@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from .schemas import EntityAnnotation, MedicalDocument
+from .constants import ENTITY_TYPE_SET
+from .schemas import (
+    EntityAnnotation,
+    MedicalDocument,
+)
 
 
 SUPPORTED_TEXT_FIELDS = ("text", "raw_text", "content", "document", "note")
@@ -164,6 +169,11 @@ def _parse_entity(
 
     entity_text = entity["text"]
     entity_type = entity["type"]
+    if entity_type not in ENTITY_TYPE_SET:
+        raise ValueError(
+            f"{document_id}, entity {entity_index}: "
+            f"type không hợp lệ {entity_type!r}."
+        )
     position = entity["position"]
     if not isinstance(entity_text, str) or not isinstance(entity_type, str):
         raise TypeError(
@@ -202,8 +212,15 @@ def _parse_entity(
         entity_type=entity_type,
         start=start,
         end=end,
-        assertions=[str(value) for value in assertions],
-        candidates=[str(value) for value in candidates],
+        assertions=[
+            str(value)
+            for value in assertions
+        ],
+        candidates=[
+            str(value)
+            for value in candidates
+        ],
+        source="gold",
     )
 
 
@@ -215,10 +232,57 @@ def _extract_entities(
         return []
     if not isinstance(raw_entities, list):
         raise TypeError(f"{document_id}: entities/labels/annotations phải là list.")
-    return [
-        _parse_entity(entity, raw_text, document_id, index)
-        for index, entity in enumerate(raw_entities)
+    entities = [
+        _parse_entity(
+            entity,
+            raw_text,
+            document_id,
+            index,
+        )
+        for index, entity
+        in enumerate(raw_entities)
     ]
+
+    entities.sort(
+        key=lambda item: (
+            item.start,
+            item.end,
+            item.entity_type,
+        )
+    )
+
+    seen: set[tuple[int, int, str]] = set()
+
+    for index, entity in enumerate(entities):
+        key = (
+            entity.start,
+            entity.end,
+            entity.entity_type,
+        )
+
+        if key in seen:
+            raise ValueError(
+                f"{document_id}: entity bị trùng "
+                f"{key}."
+            )
+
+        seen.add(key)
+
+        if index == 0:
+            continue
+
+        previous = entities[index - 1]
+
+        if entity.start < previous.end:
+            raise ValueError(
+                f"{document_id}: entity overlap: "
+                f"{previous.text!r} "
+                f"[{previous.start}, {previous.end}) "
+                f"và {entity.text!r} "
+                f"[{entity.start}, {entity.end})."
+            )
+
+    return entities
 
 
 def _record_to_document(

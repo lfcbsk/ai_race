@@ -6,12 +6,11 @@ import random
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterable
-
 from src.preprocessing import (
+    load_documents,
     load_synthetic_data,
     synthetic_to_documents,
 )
-
 from .datasets import (
     DatasetBuildResult,
     GLiNERSample,
@@ -38,7 +37,7 @@ class NERTrainerConfig:
     logging_steps: int = 10
     save_total_limit: int = 2
     device: str = "cpu"
-    fp16: bool = True
+    fp16: bool = False
     bf16: bool = False
     allow_remote_model: bool = False
     max_parameters: int = 9_000_000_000
@@ -56,7 +55,19 @@ class NERTrainerConfig:
             raise ValueError("warmup_ratio phải nằm trong [0, 1).")
         if self.max_parameters <= 0:
             raise ValueError("max_parameters phải lớn hơn 0.")
-
+        if self.gradient_accumulation_steps <= 0:
+            raise ValueError(
+                "gradient_accumulation_steps "
+                "phải lớn hơn 0.")
+        if self.fp16 and self.bf16:
+            raise ValueError(
+                "Không được bật đồng thời "
+                "fp16 và bf16.")
+        uses_cuda = self.device.lower().startswith( "cuda")
+        if ( not uses_cuda and (self.fp16 or self.bf16) ):
+            raise ValueError(
+                "fp16/bf16 chỉ dùng được "
+                "khi device là CUDA.")
 
 @dataclass
 class NERTrainingResult:
@@ -193,6 +204,34 @@ def prepare_synthetic_ner_dataset(
         normalize_kwargs=normalize_kwargs,
     )
 
+def prepare_document_ner_dataset(
+    path: str | Path,
+    *,
+    strict: bool = True,
+    error_log_path:
+        str | Path | None = None,
+    normalize_kwargs:
+        dict[str, Any] | None = None,
+    max_tokens: int = 320,
+    token_overlap: int = 64,
+) -> DatasetBuildResult:
+    documents = load_documents(
+        path,
+        strict=strict,
+    )
+
+    return build_gliner_dataset(
+        documents,
+        on_error=(
+            "raise"
+            if strict
+            else "skip"
+        ),
+        error_log_path=error_log_path,
+        normalize_kwargs=normalize_kwargs,
+        max_tokens=max_tokens,
+        token_overlap=token_overlap,
+    )
 
 def _set_seed(seed: int) -> None:
     random.seed(seed)
@@ -343,72 +382,240 @@ def _main() -> None:
     parser = argparse.ArgumentParser(
         description="Fine-tune GLiNER NER bằng checkpoint local."
     )
-    source = parser.add_mutually_exclusive_group(required=True)
-    source.add_argument("--train", help="GLiNER dataset .json/.jsonl")
-    source.add_argument("--contents", help="Synthetic contents.jsonl")
+    source = ( parser.add_mutually_exclusive_group( required=True ))
+    source.add_argument("--train",
+        help=(
+            "Dataset đã ở dạng "
+            "tokenized_text + ner."),)
+    source.add_argument( "--contents",
+        help="Synthetic contents.jsonl",)
+    source.add_argument( "--train-documents",
+        help=(
+            "JSONL dạng "
+            "note_id/text/entities."),)
+    parser.add_argument("--eval-documents",
+        help=(
+            "Validation JSONL dạng "
+            "note_id/text/entities."),)
+    parser.add_argument( "--max-tokens", type=int, default=320,)
+    parser.add_argument( "--token-overlap", type=int, default=64,)
+    parser.add_argument( "--eval-batch-size", type=int, default=2,)
+    parser.add_argument(  "--gradient-accumulation-steps", type=int,default=4,)
+    parser.add_argument( "--others-learning-rate", type=float, default=1e-5,)
+    parser.add_argument(  "--weight-decay", type=float, default=0.01, )
+    parser.add_argument(  "--warmup-steps", type=int, default=50,)
+    parser.add_argument(  "--save-steps", type=int, default=100,)
+    parser.add_argument("--logging-steps", type=int, default=10,)
     parser.add_argument("--labels", help="Synthetic labels.jsonl; bắt buộc với --contents")
     parser.add_argument("--model", required=True, help="Checkpoint GLiNER local")
     parser.add_argument("--output", default="models/medical-gliner")
     parser.add_argument("--validation-ratio", type=float, default=0.1)
     parser.add_argument("--max-steps", type=int, default=2_000)
-    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--batch-size", type=int, default=2)
     parser.add_argument("--learning-rate", type=float, default=1e-5)
     parser.add_argument("--device", default="cpu")
-    parser.add_argument("--bf16", action="store_true")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--allow-remote-model", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    precision_group = ( parser.add_mutually_exclusive_group())
+    precision_group.add_argument( "--fp16",  action="store_true",)
+    precision_group.add_argument( "--bf16", action="store_true",)
     args = parser.parse_args()
 
     config = NERTrainerConfig(
         model_path=args.model,
         output_dir=args.output,
-        validation_ratio=args.validation_ratio,
+        validation_ratio=(
+            args.validation_ratio
+        ),
         seed=args.seed,
         max_steps=args.max_steps,
-        train_batch_size=args.batch_size,
-        eval_batch_size=args.batch_size,
-        learning_rate=args.learning_rate,
-        device=args.device,
-        bf16=args.bf16,
-        allow_remote_model=args.allow_remote_model,
-    )
-    if args.contents:
-        if not args.labels:
-            parser.error("--labels là bắt buộc khi dùng --contents.")
-        prepared = prepare_synthetic_ner_dataset(
-            args.contents,
-            args.labels,
-            strict=False,
-            error_log_path=(
-                None
-                if args.dry_run
-                else Path(args.output) / "dataset_errors.jsonl"
-            ),
-        )
-        samples = prepared.samples
-        dataset_errors = len(prepared.errors)
-    else:
-        samples = load_gliner_dataset(args.train)
-        dataset_errors = 0
 
-    train_data, eval_data = split_gliner_dataset(
-        samples,
-        validation_ratio=config.validation_ratio,
-        seed=config.seed,
+        train_batch_size=args.batch_size,
+        eval_batch_size=(
+            args.eval_batch_size
+        ),
+
+        gradient_accumulation_steps=(
+            args.gradient_accumulation_steps
+        ),
+
+        learning_rate=args.learning_rate,
+        others_learning_rate=(
+            args.others_learning_rate
+        ),
+
+        weight_decay=args.weight_decay,
+        warmup_steps=args.warmup_steps,
+        save_steps=args.save_steps,
+        logging_steps=args.logging_steps,
+
+        device=args.device,
+        fp16=args.fp16,
+        bf16=args.bf16,
+
+        allow_remote_model=(
+            args.allow_remote_model
+        ),
     )
+    if args.train_documents:
+        if not args.eval_documents:
+            parser.error(
+                "--eval-documents là bắt buộc "
+                "khi dùng --train-documents."
+            )
+
+        train_prepared = (
+            prepare_document_ner_dataset(
+                args.train_documents,
+                strict=False,
+                error_log_path=(
+                    None
+                    if args.dry_run
+                    else Path(args.output)
+                    / "train_dataset_errors.jsonl"
+                ),
+                max_tokens=args.max_tokens,
+                token_overlap=(
+                    args.token_overlap
+                ),
+            )
+        )
+
+        eval_prepared = (
+            prepare_document_ner_dataset(
+                args.eval_documents,
+                strict=False,
+                error_log_path=(
+                    None
+                    if args.dry_run
+                    else Path(args.output)
+                    / "eval_dataset_errors.jsonl"
+                ),
+                max_tokens=args.max_tokens,
+                token_overlap=(
+                    args.token_overlap
+                ),
+            )
+        )
+
+        train_data = train_prepared.samples
+        eval_data = eval_prepared.samples
+
+        dataset_errors = (
+            len(train_prepared.errors)
+            + len(eval_prepared.errors)
+        )
+
+    elif args.contents:
+        if not args.labels:
+            parser.error(
+                "--labels là bắt buộc "
+                "khi dùng --contents."
+            )
+
+        prepared = (
+            prepare_synthetic_ner_dataset(
+                args.contents,
+                args.labels,
+                strict=False,
+                error_log_path=(
+                    None
+                    if args.dry_run
+                    else Path(args.output)
+                    / "dataset_errors.jsonl"
+                ),
+            )
+        )
+
+        train_data, eval_data = (
+            split_gliner_dataset(
+                prepared.samples,
+                validation_ratio=(
+                    config.validation_ratio
+                ),
+                seed=config.seed,
+            )
+        )
+
+        dataset_errors = len(
+            prepared.errors
+        )
+
+    else:
+        samples = load_gliner_dataset(
+            args.train
+        )
+
+        train_data, eval_data = (
+            split_gliner_dataset(
+                samples,
+                validation_ratio=(
+                    config.validation_ratio
+                ),
+                seed=config.seed,
+            )
+        )
+
+        dataset_errors = 0
     if args.dry_run:
+        label_counts: dict[str, int] = {}
+
+        for sample in train_data:
+            for _, _, label in sample["ner"]:
+                label_text = str(label)
+
+                label_counts[label_text] = (
+                    label_counts.get(
+                        label_text,
+                        0,
+                    )
+                    + 1
+                )
+
+        max_train_tokens = max(
+            (
+                len(sample["tokenized_text"])
+                for sample in train_data
+            ),
+            default=0,
+        )
+
+        max_eval_tokens = max(
+            (
+                len(sample["tokenized_text"])
+                for sample in eval_data
+            ),
+            default=0,
+        )
+
         print(
             json.dumps(
                 {
-                    "train_samples": len(train_data),
-                    "eval_samples": len(eval_data),
-                    "dataset_errors": dataset_errors,
+                    "train_chunks": len(
+                        train_data
+                    ),
+                    "eval_chunks": len(
+                        eval_data
+                    ),
+                    "dataset_errors": (
+                        dataset_errors
+                    ),
+                    "max_train_tokens": (
+                        max_train_tokens
+                    ),
+                    "max_eval_tokens": (
+                        max_eval_tokens
+                    ),
+                    "train_label_counts": (
+                        label_counts
+                    ),
                 },
                 ensure_ascii=False,
                 indent=2,
             )
         )
+
         return
     result = fine_tune_gliner(
         train_data,

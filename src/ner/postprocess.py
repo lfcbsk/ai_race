@@ -88,10 +88,24 @@ def map_to_raw_offsets(
         )
         entities.append(
             EntityAnnotation(
-                text=normalized.raw_text[raw_start:raw_end],
-                entity_type=prediction.entity_type,
+                text=normalized.raw_text[
+                    raw_start:raw_end
+                ],
+                entity_type=(
+                    prediction.entity_type
+                ),
                 start=raw_start,
                 end=raw_end,
+                confidence=(
+                    prediction.confidence
+                ),
+                source=prediction.source,
+                metadata={
+                    "normalized_position": [
+                        prediction.normalized_start,
+                        prediction.normalized_end,
+                    ],
+                },
             )
         )
 

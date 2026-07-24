@@ -19,7 +19,7 @@ from .inference import (
     predict_documents,
     iter_text_chunks,
 )
-from .metrics import NERMetricsReport, TypeMetrics, evaluate_ner, score_document
+from .evaluate import NERMetricsReport, TypeMetrics, evaluate_ner, score_document
 from .postprocess import (
     deduplicate_predictions,
     filter_by_confidence,

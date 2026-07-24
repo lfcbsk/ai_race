@@ -3,6 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from .constants import (
+    ASSERTION_ENTITY_TYPES,
+    CANDIDATE_ENTITY_TYPES,
+)
+
 
 @dataclass
 class EntityAnnotation:
@@ -10,6 +15,7 @@ class EntityAnnotation:
     entity_type: str
     start: int
     end: int
+
     assertions: list[str] = field(
         default_factory=list
     )
@@ -17,29 +23,50 @@ class EntityAnnotation:
         default_factory=list
     )
 
+    # Metadata nội bộ, không đưa vào submission.
+    confidence: float | None = None
+    source: str = "unknown"
+    metadata: dict[str, Any] = field(
+        default_factory=dict
+    )
+
     @property
     def position(self) -> list[int]:
         return [self.start, self.end]
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(
+        self,
+        *,
+        include_internal: bool = False,
+    ) -> dict[str, Any]:
         output: dict[str, Any] = {
             "text": self.text,
             "type": self.entity_type,
             "position": self.position,
         }
 
-        if self.entity_type in {
-            "TRIỆU_CHỨNG",
-            "CHẨN_ĐOÁN",
-            "THUỐC",
-        }:
-            output["assertions"] = self.assertions
+        if (
+            self.entity_type
+            in ASSERTION_ENTITY_TYPES
+        ):
+            output["assertions"] = list(
+                self.assertions
+            )
 
-        if self.entity_type in {
-            "CHẨN_ĐOÁN",
-            "THUỐC",
-        }:
-            output["candidates"] = self.candidates
+        if (
+            self.entity_type
+            in CANDIDATE_ENTITY_TYPES
+        ):
+            output["candidates"] = list(
+                self.candidates
+            )
+
+        if include_internal:
+            output["confidence"] = self.confidence
+            output["source"] = self.source
+            output["metadata"] = dict(
+                self.metadata
+            )
 
         return output
 
@@ -63,7 +90,11 @@ class MedicalDocument:
         default_factory=dict
     )
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(
+        self,
+        *,
+        include_internal: bool = False,
+    ) -> dict[str, Any]:
         return {
             "document_id": self.document_id,
             "raw_text": self.raw_text,
@@ -72,7 +103,9 @@ class MedicalDocument:
                 self.normalized_to_raw
             ),
             "entities": [
-                entity.to_dict()
+                entity.to_dict(
+                    include_internal=include_internal
+                )
                 for entity in self.entities
             ],
             "metadata": self.metadata,

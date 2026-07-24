@@ -54,10 +54,17 @@ class _Token:
     start: int
     end: int
 
+@dataclass(frozen=True)
+class _MappedEntity:
+    token_start: int
+    token_end: int
+    label: str
+    entity_index: int
 
 # Unicode words/numbers and standalone punctuation. Whitespace is not a token.
 _TOKEN_PATTERN = re.compile(r"\w+|[^\w\s]", flags=re.UNICODE)
-
+DEFAULT_MAX_TOKENS = 320
+DEFAULT_TOKEN_OVERLAP = 64
 
 def _tokenize_with_offsets(text: str) -> list[_Token]:
     return [
@@ -65,6 +72,45 @@ def _tokenize_with_offsets(text: str) -> list[_Token]:
         for match in _TOKEN_PATTERN.finditer(text)
     ]
 
+def _build_token_windows(
+    token_count: int,
+    *,
+    max_tokens: int,
+    overlap: int,
+) -> list[tuple[int, int]]:
+    if max_tokens <= 0:
+        raise ValueError(
+            "max_tokens phải lớn hơn 0."
+        )
+
+    if not 0 <= overlap < max_tokens:
+        raise ValueError(
+            "overlap phải thỏa "
+            "0 <= overlap < max_tokens."
+        )
+
+    if token_count <= max_tokens:
+        return [(0, token_count)]
+
+    step = max_tokens - overlap
+    windows: list[tuple[int, int]] = []
+
+    start = 0
+
+    while start < token_count:
+        end = min(
+            start + max_tokens,
+            token_count,
+        )
+
+        windows.append((start, end))
+
+        if end == token_count:
+            break
+
+        start += step
+
+    return windows
 
 def _entity_dict(entity: EntityAnnotation) -> dict[str, Any]:
     return {
@@ -115,11 +161,13 @@ def _char_span_to_token_span(
     return start_token, end_token
 
 
-def convert_document_to_ner_sample(
-    document: MedicalDocument,
-    *,
-    normalize_kwargs: dict[str, Any] | None = None,
-) -> GLiNERSample:
+def convert_document_to_ner_samples(
+        document: MedicalDocument,
+        *,
+        normalize_kwargs: dict[str, Any] | None = None,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
+        token_overlap: int = DEFAULT_TOKEN_OVERLAP,
+    ) -> list[GLiNERSample]:
     """Convert one labeled ``MedicalDocument`` to GLiNER training format.
 
     Entity offsets in ``MedicalDocument`` are interpreted against ``raw_text``.
@@ -139,8 +187,10 @@ def convert_document_to_ner_sample(
     if not tokens:
         _fail(document, "no_tokens", "Không tạo được token từ văn bản normalized.")
 
-    ner: list[list[int | str]] = []
-    seen_entities: set[tuple[int, int, str]] = set()
+    mapped_entities: list[_MappedEntity] = []
+    seen_entities: set[
+        tuple[int, int, str]
+    ] = set()
 
     for entity_index, entity in enumerate(document.entities):
         if not isinstance(entity, EntityAnnotation):
@@ -249,13 +299,103 @@ def convert_document_to_ner_sample(
                 entity=entity,
             )
         seen_entities.add(key)
-        ner.append([token_start, token_end, entity.entity_type])
+        mapped_entities.append(
+                            _MappedEntity(
+                                token_start=token_start,
+                                token_end=token_end,
+                                label=entity.entity_type,
+                                entity_index=entity_index,
+                            )
+                        )
 
-    ner.sort(key=lambda item: (int(item[0]), int(item[1]), str(item[2])))
-    return {
-        "tokenized_text": [token.text for token in tokens],
-        "ner": ner,
-    }
+    windows = _build_token_windows(
+        len(tokens),
+        max_tokens=max_tokens,
+        overlap=token_overlap,
+    )
+
+    samples: list[GLiNERSample] = []
+    covered_entities: set[int] = set()
+
+    for window_start, window_end in windows:
+        chunk_entities: list[
+            list[int | str]
+        ] = []
+
+        for mapped in mapped_entities:
+            if not (
+                window_start
+                <= mapped.token_start
+                and mapped.token_end
+                < window_end
+            ):
+                continue
+
+            chunk_entities.append(
+                [
+                    mapped.token_start
+                    - window_start,
+                    mapped.token_end
+                    - window_start,
+                    mapped.label,
+                ]
+            )
+
+            covered_entities.add(
+                mapped.entity_index
+            )
+
+        # Giai đoạn đầu chỉ train chunk có entity.
+        if not chunk_entities:
+            continue
+
+        chunk_entities.sort(
+            key=lambda item: (
+                int(item[0]),
+                int(item[1]),
+                str(item[2]),
+            )
+        )
+
+        samples.append(
+            {
+                "tokenized_text": [
+                    token.text
+                    for token in tokens[
+                        window_start:window_end
+                    ]
+                ],
+                "ner": chunk_entities,
+            }
+        )
+
+    missing_entities = {
+        mapped.entity_index
+        for mapped in mapped_entities
+    } - covered_entities
+
+    if missing_entities:
+        _fail(
+            document,
+            "entity_not_covered",
+            (
+                "Một số entity không nằm "
+                "trong training window: "
+                f"{sorted(missing_entities)}"
+            ),
+        )
+
+    if not samples:
+        _fail(
+            document,
+            "no_training_chunks",
+            (
+                "Không tạo được training chunk "
+                "có entity."
+            ),
+        )
+
+    return samples
 
 
 def _write_error_log(path: str | Path, errors: list[DatasetError]) -> None:
@@ -269,9 +409,16 @@ def _write_error_log(path: str | Path, errors: list[DatasetError]) -> None:
 def build_gliner_dataset(
     documents: Iterable[MedicalDocument],
     *,
-    on_error: Literal["raise", "skip"] = "skip",
-    error_log_path: str | Path | None = None,
-    normalize_kwargs: dict[str, Any] | None = None,
+    on_error: Literal["raise", "skip"]
+        = "skip",
+    error_log_path:
+        str | Path | None = None,
+    normalize_kwargs:
+        dict[str, Any] | None = None,
+    max_tokens: int = DEFAULT_MAX_TOKENS,
+    token_overlap: int = (
+        DEFAULT_TOKEN_OVERLAP
+    ),
 ) -> DatasetBuildResult:
     """Convert documents, optionally skipping and logging invalid samples.
 
@@ -285,10 +432,12 @@ def build_gliner_dataset(
     result = DatasetBuildResult()
     for document_index, document in enumerate(documents):
         try:
-            result.samples.append(
-                convert_document_to_ner_sample(
+            result.samples.extend(
+                convert_document_to_ner_samples(
                     document,
                     normalize_kwargs=normalize_kwargs,
+                    max_tokens=max_tokens,
+                    token_overlap=token_overlap,
                 )
             )
         except NERDatasetError as exc:
@@ -312,3 +461,5 @@ def build_gliner_dataset(
     if error_log_path is not None:
         _write_error_log(error_log_path, result.errors)
     return result
+
+
